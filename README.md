@@ -19,8 +19,8 @@ BedTrack is a **hospital bed management system** designed to streamline bed allo
 ## 🛠️ Installation Guide
 ### **1️⃣ Clone the Repository**
 ```bash
-git clone https://github.com/RenNanase/bedtrack.git
-cd bedtrack
+git clone https://github.com/RenNanase/BedTrack.git
+cd BedTrack
 ```
 ### **2️⃣ Install Dependencies**
 ```bash
