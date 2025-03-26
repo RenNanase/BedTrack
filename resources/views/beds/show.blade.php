@@ -76,9 +76,18 @@
                         <h2 class="font-semibold text-lg text-gray-800">Change Status</h2>
                     </div>
                     <div class="p-5">
-                        <form action="{{ route('beds.update-status', $bed) }}" method="POST">
+                        <form action="{{ route('beds.update-status', $bed) }}" method="POST" id="bedStatusForm" onsubmit="return validateForm()">
                             @csrf
                             @method('PUT')
+
+                            <div class="mb-4 bg-blue-50 p-3 rounded-md text-sm text-blue-800">
+                                <p class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                    Fields marked with <span class="text-red-500 mx-1">*</span> are required when registering a patient.
+                                </p>
+                            </div>
 
                             <div class="mb-4">
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -100,13 +109,44 @@
 
                             <div id="patient-fields" class="{{ $bed->status == 'Available' ? 'hidden' : '' }}">
                                 <div class="mb-4">
-                                    <label for="patient_name" class="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
-                                    <input type="text" name="patient_name" id="patient_name" value="{{ $bed->patient_name }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                    <label for="patient_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Patient Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="patient_name" id="patient_name" value="{{ $bed->patient_name }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="patient_info" class="block text-sm font-medium text-gray-700 mb-2">Patient Information</label>
-                                    <textarea name="patient_info" id="patient_info" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">{{ $bed->patient_info }}</textarea>
+                                    <label for="patient_category" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Patient Category <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="patient_category" id="patient_category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                        <option value="">Select category...</option>
+                                        <option value="Adult" {{ $bed->patient_category == 'Adult' ? 'selected' : '' }}>Adult</option>
+                                        <option value="Paediatric" {{ $bed->patient_category == 'Paediatric' ? 'selected' : '' }}>Paediatric</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Gender <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="gender" id="gender" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                        <option value="">Select gender...</option>
+                                        <option value="Male" {{ $bed->gender == 'Male' ? 'selected' : '' }}>Male</option>
+                                        <option value="Female" {{ $bed->gender == 'Female' ? 'selected' : '' }}>Female</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="mrn" class="block text-sm font-medium text-gray-700 mb-2">
+                                        MRN (Medical Record Number) <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="mrn" id="mrn" value="{{ $bed->mrn }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                                    <textarea name="notes" id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">{{ $bed->notes }}</textarea>
                                 </div>
                             </div>
 
@@ -129,18 +169,35 @@
                             </a>
                         </div>
                         <div class="p-5">
-                            <div class="mb-4">
-                                <h3 class="text-sm font-semibold text-gray-500 mb-1">Patient Name</h3>
-                                <p class="text-lg text-gray-800">{{ $bed->patient_name }}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Patient Name</h3>
+                                    <p class="text-lg text-gray-800">{{ $bed->patient_name }}</p>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Category</h3>
+                                    <p class="text-lg text-gray-800">{{ $bed->patient_category ?: 'Not specified' }}</p>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Gender</h3>
+                                    <p class="text-lg text-gray-800">{{ $bed->gender ?: 'Not specified' }}</p>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-500 mb-1">MRN</h3>
+                                    <p class="text-lg text-gray-800">{{ $bed->mrn ?: 'Not specified' }}</p>
+                                </div>
                             </div>
 
                             <div>
-                                <h3 class="text-sm font-semibold text-gray-500 mb-1">Patient Information</h3>
+                                <h3 class="text-sm font-semibold text-gray-500 mb-1">Notes</h3>
                                 <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
-                                    @if($bed->patient_info)
-                                        <p class="text-gray-800 whitespace-pre-line">{{ $bed->patient_info }}</p>
+                                    @if($bed->notes)
+                                        <p class="text-gray-800 whitespace-pre-line">{{ $bed->notes }}</p>
                                     @else
-                                        <p class="text-gray-500 italic">No additional information</p>
+                                        <p class="text-gray-500 italic">No additional notes</p>
                                     @endif
                                 </div>
                             </div>
@@ -152,6 +209,7 @@
     </div>
 </div>
 
+
 <script>
 function togglePatientFields(status) {
     const patientFields = document.getElementById('patient-fields');
@@ -160,6 +218,46 @@ function togglePatientFields(status) {
     } else {
         patientFields.classList.remove('hidden');
     }
+}
+
+function validateForm() {
+    const statusValue = document.getElementById('status').value;
+
+    // Skip validation if bed is being marked as Available
+    if (statusValue === 'Available') {
+        return true;
+    }
+
+    // Required fields for patient registration
+    const requiredFields = [
+        { id: 'patient_name', label: 'Patient Name' },
+        { id: 'patient_category', label: 'Patient Category' },
+        { id: 'gender', label: 'Gender' },
+        { id: 'mrn', label: 'MRN (Medical Record Number)' }
+    ];
+
+    let isValid = true;
+    let errorMessage = 'Please fill in the following required fields:\n';
+
+    // Check each required field
+    requiredFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const value = input.value.trim();
+
+        if (!value) {
+            errorMessage += `- ${field.label}\n`;
+            input.classList.add('border-red-500');
+            isValid = false;
+        } else {
+            input.classList.remove('border-red-500');
+        }
+    });
+
+    if (!isValid) {
+        alert(errorMessage);
+    }
+
+    return isValid;
 }
 </script>
 @endsection

@@ -15,7 +15,10 @@ class Bed extends Model
         'room_id',
         'status',
         'patient_name',
-        'patient_info',
+        'patient_category',
+        'gender',
+        'mrn',
+        'notes',
         'status_changed_at',
     ];
 

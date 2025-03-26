@@ -29,10 +29,14 @@ class BedSeeder extends Seeder
         // Add some random occupied beds for demo
         $randomBeds = Bed::inRandomOrder()->limit(5)->get();
         foreach ($randomBeds as $bed) {
+            $gender = $this->getRandomGender();
             $bed->update([
                 'status' => 'Occupied',
-                'patient_name' => $this->getRandomName(),
-                'patient_info' => $this->getRandomPatientInfo(),
+                'patient_name' => $this->getRandomName($gender),
+                'patient_category' => $this->getRandomCategory(),
+                'gender' => $gender,
+                'mrn' => $this->getRandomMRN(),
+                'notes' => $this->getRandomNotes(),
                 'status_changed_at' => Carbon::now()->subHours(rand(1, 48)), // Random time within the past 48 hours
             ]);
         }
@@ -40,10 +44,14 @@ class BedSeeder extends Seeder
         // Add some random booked beds for demo
         $randomBeds = Bed::where('status', 'Available')->inRandomOrder()->limit(3)->get();
         foreach ($randomBeds as $bed) {
+            $gender = $this->getRandomGender();
             $bed->update([
                 'status' => 'Booked',
-                'patient_name' => $this->getRandomName(),
-                'patient_info' => $this->getRandomPatientInfo(),
+                'patient_name' => $this->getRandomName($gender),
+                'patient_category' => $this->getRandomCategory(),
+                'gender' => $gender,
+                'mrn' => $this->getRandomMRN(),
+                'notes' => $this->getRandomNotes(),
                 'status_changed_at' => Carbon::now()->subHours(rand(1, 24)), // Random time within the past 24 hours
             ]);
         }
@@ -51,32 +59,80 @@ class BedSeeder extends Seeder
         // Add some discharged beds for demo
         $randomBeds = Bed::where('status', 'Available')->inRandomOrder()->limit(2)->get();
         foreach ($randomBeds as $bed) {
+            $gender = $this->getRandomGender();
             $bed->update([
                 'status' => 'Discharged',
-                'patient_name' => $this->getRandomName(),
-                'patient_info' => $this->getRandomPatientInfo(),
+                'patient_name' => $this->getRandomName($gender),
+                'patient_category' => $this->getRandomCategory(),
+                'gender' => $gender,
+                'mrn' => $this->getRandomMRN(),
+                'notes' => $this->getRandomNotes(),
                 'status_changed_at' => Carbon::now()->subHours(rand(1, 12)), // Random time within the past 12 hours
             ]);
         }
     }
 
     /**
-     * Get a random patient name for demo purposes.
+     * Get a random gender for demo purposes.
      */
-    private function getRandomName(): string
+    private function getRandomGender(): string
     {
-        $firstNames = ['James', 'John', 'Robert', 'Michael', 'William', 'David', 'Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Susan'];
-        $lastNames = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas'];
+        $genders = ['Male', 'Female'];
+        return $genders[array_rand($genders)];
+    }
+
+    /**
+     * Get a random patient name for demo purposes, based on gender.
+     */
+    private function getRandomName(string $gender): string
+    {
+        if ($gender === 'Male') {
+            $firstNames = [
+                'Haruto',
+                'Riku',
+                'Souta',
+                'Takumi',
+                'Ren',
+                'Tsubasa',
+            ];
+        } else {
+            $firstNames = [
+                'Sakura',
+                'Yuki',
+                'Hana',
+                'Aoi',
+                'Rina',
+                'Mika'
+            ];
+        }
+
+        $lastNames = ['Tanaka', 'Takahashi', 'Yamamoto', 'Kobayashi', 'Fujimoto', 'Matsuda', 'Shimizu', 'Ishikawa', 'Nakagawa', 'Kondo', 'Hoshino', 'Sakamoto'];
 
         return $firstNames[array_rand($firstNames)] . ' ' . $lastNames[array_rand($lastNames)];
     }
 
     /**
-     * Get random patient information for demo purposes.
+     * Get a random patient category for demo purposes.
      */
-    private function getRandomPatientInfo(): string
+    private function getRandomCategory(): string
     {
-        $patientIds = ['PT-' . rand(10000, 99999)];
+        $categories = ['Adult', 'Paediatric'];
+        return $categories[array_rand($categories)];
+    }
+
+    /**
+     * Get a random MRN for demo purposes.
+     */
+    private function getRandomMRN(): string
+    {
+        return 'MRN' . rand(100000, 999999);
+    }
+
+    /**
+     * Get random notes for demo purposes.
+     */
+    private function getRandomNotes(): string
+    {
         $diagnoses = ['Fever', 'Hypertension', 'Diabetes', 'Fracture', 'Pneumonia', 'Common Cold', 'Allergic Reaction', 'Migraine'];
         $notes = [
             'Patient requires regular monitoring',
@@ -88,8 +144,7 @@ class BedSeeder extends Seeder
             'Follow-up appointment scheduled'
         ];
 
-        $patientInfo = "Patient ID: " . $patientIds[array_rand($patientIds)] . "\n";
-        $patientInfo .= "Diagnosis: " . $diagnoses[array_rand($diagnoses)] . "\n";
+        $patientInfo = "Diagnosis: " . $diagnoses[array_rand($diagnoses)] . "\n";
         $patientInfo .= "Notes: " . $notes[array_rand($notes)];
 
         return $patientInfo;

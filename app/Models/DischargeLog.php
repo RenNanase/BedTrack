@@ -14,7 +14,10 @@ class DischargeLog extends Model
         'bed_id',
         'room_id',
         'patient_name',
-        'patient_info',
+        'patient_category',
+        'gender',
+        'mrn',
+        'notes',
         'discharged_at',
     ];
 

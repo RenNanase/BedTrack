@@ -22,6 +22,94 @@
             </div>
         </div>
 
+        <!-- Legend Section -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center" onclick="toggleLegend()">
+                <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
+                <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div id="legendContent" class="p-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Status</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                                <span class="text-sm">Available</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></span>
+                                <span class="text-sm">Booked</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                                <span class="text-sm">Occupied</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                                <span class="text-sm">Discharged</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
+                                <span class="text-sm">Male</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
+                                <span class="text-sm">Female</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
+                                <span class="text-sm">Adult</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
+                                <span class="text-sm">Paediatric</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Combined Examples</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <div class="flex items-center space-x-1 mr-2">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold">
+                                        ♂
+                                    </span>
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                        👨
+                                    </span>
+                                </div>
+                                <span class="text-sm">Male Adult</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="flex items-center space-x-1 mr-2">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold">
+                                        ♀
+                                    </span>
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                        👶
+                                    </span>
+                                </div>
+                                <span class="text-sm">Female Paediatric</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Summary Card -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             <div class="p-5 border-b border-gray-200 bg-primary/5">
@@ -173,6 +261,9 @@
                                     Patient
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Discharged At
                                 </th>
                             </tr>
@@ -189,7 +280,21 @@
                                     {{ $discharge->room->room_name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $discharge->patient_name }}
+                                    <div class="flex items-center">
+                                        <span class="mr-2">{{ $discharge->patient_name }}</span>
+                                        @if($discharge->gender)
+                                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full {{ $discharge->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold text-xs">
+                                                {{ $discharge->gender == 'Male' ? '♂' : '♀' }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($discharge->patient_category)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ $discharge->patient_category == 'Adult' ? '👨 Adult' : '👶 Paediatric' }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $discharge->discharged_at->format('M d, Y - h:i A') }}
@@ -242,7 +347,21 @@
                                     </div>
                                     <div class="p-3">
                                         @if($bed->status != 'Available')
-                                            <p class="text-sm font-medium text-gray-700">{{ $bed->patient_name ?: 'Unknown' }}</p>
+                                            <div class="flex justify-between items-start">
+                                                <p class="text-sm font-medium text-gray-700">{{ $bed->patient_name ?: 'Unknown' }}</p>
+                                                <div class="flex items-center space-x-1">
+                                                    @if($bed->gender)
+                                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold">
+                                                            {{ $bed->gender == 'Male' ? '♂' : '♀' }}
+                                                        </span>
+                                                    @endif
+                                                    @if($bed->patient_category)
+                                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                                            {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                             @if($bed->status_changed_at)
                                                 <p class="text-xs text-gray-500 mt-1">
                                                     {{ $bed->status == 'Discharged' ? 'Discharged' : 'Since' }}:
@@ -264,4 +383,19 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleLegend() {
+        const content = document.getElementById('legendContent');
+        const icon = document.getElementById('legendToggleIcon');
+
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.innerHTML = '<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />';
+        } else {
+            content.style.display = 'none';
+            icon.innerHTML = '<path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />';
+        }
+    }
+</script>
 @endsection

@@ -26,7 +26,10 @@ class BedController extends Controller
         $validated = $request->validate([
             'status' => ['required', Rule::in(['Available', 'Booked', 'Occupied', 'Discharged'])],
             'patient_name' => 'nullable|required_unless:status,Available|string|max:255',
-            'patient_info' => 'nullable|string',
+            'patient_category' => 'nullable|required_unless:status,Available|string|max:255',
+            'gender' => 'nullable|required_unless:status,Available|string|max:10',
+            'mrn' => 'nullable|required_unless:status,Available|string|max:50',
+            'notes' => 'nullable|string',
         ]);
 
         $oldStatus = $bed->status;
@@ -39,7 +42,10 @@ class BedController extends Controller
                 'bed_id' => $bed->id,
                 'room_id' => $bed->room_id,
                 'patient_name' => $bed->patient_name ?: $validated['patient_name'],
-                'patient_info' => $bed->patient_info ?: $validated['patient_info'],
+                'patient_category' => $bed->patient_category ?: $validated['patient_category'],
+                'gender' => $bed->gender ?: $validated['gender'],
+                'mrn' => $bed->mrn ?: $validated['mrn'],
+                'notes' => $bed->notes ?: $validated['notes'],
                 'discharged_at' => Carbon::now(),
             ]);
 
@@ -53,7 +59,10 @@ class BedController extends Controller
             $bed->update([
                 'status' => 'Available',
                 'patient_name' => null,
-                'patient_info' => null,
+                'patient_category' => null,
+                'gender' => null,
+                'mrn' => null,
+                'notes' => null,
                 // Don't update status_changed_at for this automatic change
             ]);
 
@@ -64,7 +73,10 @@ class BedController extends Controller
         // If status is changed to Available, clear patient information
         if ($validated['status'] === 'Available') {
             $validated['patient_name'] = null;
-            $validated['patient_info'] = null;
+            $validated['patient_category'] = null;
+            $validated['gender'] = null;
+            $validated['mrn'] = null;
+            $validated['notes'] = null;
         }
 
         // Set status_changed_at if status has changed
@@ -92,7 +104,10 @@ class BedController extends Controller
     {
         $validated = $request->validate([
             'patient_name' => 'required|string|max:255',
-            'patient_info' => 'nullable|string',
+            'patient_category' => 'required|string|max:255',
+            'gender' => 'required|string|max:10',
+            'mrn' => 'required|string|max:50',
+            'notes' => 'nullable|string',
         ]);
 
         $bed->update($validated);
