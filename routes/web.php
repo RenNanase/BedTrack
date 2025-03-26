@@ -40,3 +40,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 // Register Admin Middleware in App\Providers\AppServiceProvider.php boot() method with:
 // Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
+
+Route::get('/activity-logs/load-more', [App\Http\Controllers\ActivityLogController::class, 'loadMore'])->name('activity-logs.load-more');

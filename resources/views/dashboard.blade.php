@@ -22,95 +22,142 @@
             </div>
         </div>
 
-        <!-- Legend Section -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center" onclick="toggleLegend()">
-                <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
-                <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div id="legendContent" class="p-4">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Status</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center">
-                                <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-                                <span class="text-sm">Available</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></span>
-                                <span class="text-sm">Booked</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-                                <span class="text-sm">Occupied</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-                                <span class="text-sm">Discharged</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center">
-                                <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
-                                <span class="text-sm">Male</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
-                                <span class="text-sm">Female</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center">
-                                <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
-                                <span class="text-sm">Adult</span>
-                            </div>
-                            <div class="flex items-center">
-                                <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
-                                <span class="text-sm">Paediatric</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Combined Examples</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center">
-                                <div class="flex items-center space-x-1 mr-2">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold">
-                                        ♂
-                                    </span>
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
-                                        👨
-                                    </span>
-                                </div>
-                                <span class="text-sm">Male Adult</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="flex items-center space-x-1 mr-2">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold">
-                                        ♀
-                                    </span>
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
-                                        👶
-                                    </span>
-                                </div>
-                                <span class="text-sm">Female Paediatric</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Summary Card -->
+
+        <!-- Main Dashboard Content with Activity Timeline -->
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Main Dashboard Content -->
+                    <div class="w-full md:w-2/3">
+                        <!-- Activity Timeline -->
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div class="p-4 border-b border-gray-200 bg-primary/5">
+                                <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                            </div>
+                            <div class="p-4">
+                                @if(count($activityLogs) > 0)
+                                <div class="relative" id="activity-container">
+                                    <!-- Activity logs will be loaded here -->
+                                    @include('partials.activity-logs', ['activityLogs' => $activityLogs])
+
+                                    @if($hasMoreLogs)
+                                    <div class="text-center mt-6">
+                                        <button id="load-more-btn"
+                                            class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                                            data-offset="5">
+                                            Load More
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
+                                @else
+                                <div class="text-center py-8 text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <p>No activity logs found.</p>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend Section -->
+                            <div class="w-full md:w-1/3 shadow-md overflow-hidden mb-8 md:top-4 md:self-start md:ml-auto">
+                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                    <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center"
+                                        onclick="toggleLegend()">
+                                        <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
+                                        <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div id="legendContent" class="p-4">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Status</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                                                        <span class="text-sm">Available</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></span>
+                                                        <span class="text-sm">Booked</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                                                        <span class="text-sm">Occupied</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
+                                                        <span class="text-sm">Discharged</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
+                                                        <span class="text-sm">Male</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
+                                                        <span class="text-sm">Female</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
+                                                        <span class="text-sm">Adult</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
+                                                        <span class="text-sm">Paediatric</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Combined Examples</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <div class="flex items-center space-x-1 mr-2">
+                                                            <span
+                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold">♂</span>
+                                                            <span
+                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">👨</span>
+                                                        </div>
+                                                        <span class="text-sm">Male Adult</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <div class="flex items-center space-x-1 mr-2">
+                                                            <span
+                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold">♀</span>
+                                                            <span
+                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">👶</span>
+                                                        </div>
+                                                        <span class="text-sm">Female Paediatric</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                </div>
+
+
+
+                <!-- Summary Card -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             <div class="p-5 border-b border-gray-200 bg-primary/5">
                 <h2 class="text-xl font-semibold text-gray-900">Ward Summary</h2>
@@ -381,21 +428,74 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 </div>
 
 <script>
     function toggleLegend() {
-        const content = document.getElementById('legendContent');
-        const icon = document.getElementById('legendToggleIcon');
+        const legendContent = document.getElementById('legendContent');
+        const legendToggleIcon = document.getElementById('legendToggleIcon');
 
-        if (content.style.display === 'none') {
-            content.style.display = 'block';
-            icon.innerHTML = '<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />';
+        if (legendContent.style.display === 'none') {
+            legendContent.style.display = 'block';
+            legendToggleIcon.innerHTML = `
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            `;
         } else {
-            content.style.display = 'none';
-            icon.innerHTML = '<path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />';
+            legendContent.style.display = 'none';
+            legendToggleIcon.innerHTML = `
+                <path fill-rule="evenodd" d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            `;
         }
     }
+
+    // Load more activity logs
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                const offset = parseInt(this.getAttribute('data-offset'));
+                const limit = 5; // Number of logs to load each time
+
+                // Show loading state
+                this.innerHTML = 'Loading...';
+                this.disabled = true;
+
+                // Make AJAX request to load more logs
+                fetch(`/activity-logs/load-more?offset=${offset}&limit=${limit}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Append new logs to the container
+                    const activityContainer = document.getElementById('activity-container');
+                    activityContainer.insertAdjacentHTML('beforeend', data.html);
+
+                    // Update button state
+                    this.innerHTML = 'Load More';
+                    this.disabled = false;
+
+                    // Update offset for next request
+                    this.setAttribute('data-offset', offset + limit);
+
+                    // Hide button if no more logs
+                    if (!data.hasMore) {
+                        this.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more logs:', error);
+                    this.innerHTML = 'Error loading more logs. Try again.';
+                    this.disabled = false;
+                });
+            });
+        }
+    });
 </script>
 @endsection

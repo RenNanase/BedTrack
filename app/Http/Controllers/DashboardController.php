@@ -6,10 +6,12 @@ use App\Models\Bed;
 use App\Models\DischargeLog;
 use App\Models\Room;
 use App\Models\Ward;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\ActivityLog;
 
 class DashboardController extends Controller
 {
@@ -80,6 +82,16 @@ class DashboardController extends Controller
         ->whereDate('discharged_at', Carbon::today())
         ->count();
 
+        // Get recent activity logs
+        $activityLogs = ActivityLogger::getRecent(5);
+
+        // Check if there are more logs available
+        $hasMoreLogs = ActivityLog::where('action', '!=', 'Viewed Dashboard')
+            ->orderBy('created_at', 'desc')
+            ->skip(5)
+            ->take(1)
+            ->exists();
+
         return view('dashboard', compact(
             'ward',
             'bedCounts',
@@ -87,7 +99,9 @@ class DashboardController extends Controller
             'totalBeds',
             'currentDateTime',
             'recentDischarges',
-            'todayDischarges'
+            'todayDischarges',
+            'activityLogs',
+            'hasMoreLogs'
         ));
     }
 }

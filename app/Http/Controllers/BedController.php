@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bed;
 use App\Models\DischargeLog;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
@@ -49,6 +50,14 @@ class BedController extends Controller
                 'discharged_at' => Carbon::now(),
             ]);
 
+            // Log the discharge activity
+            ActivityLogger::log(
+                'Discharged Patient',
+                "Discharged patient {$bed->patient_name} from {$bed->room->room_name} - {$bed->bed_number}",
+                Bed::class,
+                $bed->id
+            );
+
             // First record the discharge status with timestamp (for historical purposes)
             $bed->update([
                 'status' => 'Discharged',
@@ -86,6 +95,15 @@ class BedController extends Controller
 
         $bed->update($validated);
 
+        // Log the status update activity
+        ActivityLogger::log(
+            'Updated Bed Status',
+            "Changed bed {$bed->bed_number} status from {$oldStatus} to {$newStatus}" .
+            ($validated['patient_name'] ? " for patient {$validated['patient_name']}" : ""),
+            Bed::class,
+            $bed->id
+        );
+
         return redirect()->route('dashboard')->with('success', "Bed {$bed->bed_number} status updated successfully.");
     }
 
@@ -111,6 +129,14 @@ class BedController extends Controller
         ]);
 
         $bed->update($validated);
+
+        // Log the patient update activity
+        ActivityLogger::log(
+            'Updated Patient Info',
+            "Updated patient information for {$validated['patient_name']} in {$bed->room->room_name} - {$bed->bed_number}",
+            Bed::class,
+            $bed->id
+        );
 
         return redirect()->route('beds.show', $bed)->with('success', 'Patient information updated successfully.');
     }
