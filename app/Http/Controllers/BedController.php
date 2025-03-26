@@ -25,11 +25,11 @@ class BedController extends Controller
     public function updateStatus(Request $request, Bed $bed)
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['Available', 'Booked', 'Occupied', 'Discharged'])],
-            'patient_name' => 'nullable|required_unless:status,Available|string|max:255',
-            'patient_category' => 'nullable|required_unless:status,Available|string|max:255',
-            'gender' => 'nullable|required_unless:status,Available|string|max:10',
-            'mrn' => 'nullable|required_unless:status,Available|string|max:50',
+            'status' => ['required', Rule::in(['Available', 'Booked', 'Occupied', 'Discharged', 'Housekeeping'])],
+            'patient_name' => 'nullable|required_unless:status,Available,Housekeeping|string|max:255',
+            'patient_category' => 'nullable|required_unless:status,Available,Housekeeping|string|max:255',
+            'gender' => 'nullable|required_unless:status,Available,Housekeeping|string|max:10',
+            'mrn' => 'nullable|required_unless:status,Available,Housekeeping|string|max:50',
             'notes' => 'nullable|string',
         ]);
 
@@ -64,28 +64,40 @@ class BedController extends Controller
                 'status_changed_at' => Carbon::now(),
             ]);
 
-            // Then immediately make the bed available
+            // Then immediately set the bed to Housekeeping status
             $bed->update([
-                'status' => 'Available',
-                'patient_name' => null,
-                'patient_category' => null,
-                'gender' => null,
-                'mrn' => null,
-                'notes' => null,
-                // Don't update status_changed_at for this automatic change
+                'status' => 'Housekeeping',
+                'housekeeping_started_at' => Carbon::now(),
+                // Keep patient info for reference until housekeeping is complete
+                'status_changed_at' => Carbon::now(),
             ]);
 
-            return redirect()->route('dashboard')->with('success', "Patient discharged and bed {$bed->bed_number} is now available.");
+            return redirect()->route('dashboard')->with('success', "Patient discharged and bed {$bed->bed_number} is now in housekeeping.");
         }
 
-        // Regular status update for non-discharge cases
-        // If status is changed to Available, clear patient information
-        if ($validated['status'] === 'Available') {
+        // Handle Housekeeping completion (manually set to Available)
+        if ($newStatus === 'Available' && $oldStatus === 'Housekeeping') {
+            // Clear patient information when housekeeping is complete
             $validated['patient_name'] = null;
             $validated['patient_category'] = null;
             $validated['gender'] = null;
             $validated['mrn'] = null;
             $validated['notes'] = null;
+            $validated['housekeeping_started_at'] = null;
+        }
+        // Regular status update for non-discharge cases
+        // If status is changed to Available, clear patient information
+        elseif ($validated['status'] === 'Available') {
+            $validated['patient_name'] = null;
+            $validated['patient_category'] = null;
+            $validated['gender'] = null;
+            $validated['mrn'] = null;
+            $validated['notes'] = null;
+            $validated['housekeeping_started_at'] = null;
+        }
+        // If status is explicitly set to Housekeeping
+        elseif ($validated['status'] === 'Housekeeping') {
+            $validated['housekeeping_started_at'] = Carbon::now();
         }
 
         // Set status_changed_at if status has changed

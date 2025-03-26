@@ -53,6 +53,10 @@ class DashboardController extends Controller
             'discharged' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
                 $query->where('ward_id', $selectedWardId);
             })->where('status', 'Discharged')->count(),
+
+            'housekeeping' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
+                $query->where('ward_id', $selectedWardId);
+            })->where('status', 'Housekeeping')->count(),
         ];
 
         // Calculate percentages
@@ -61,6 +65,7 @@ class DashboardController extends Controller
             'booked' => $totalBeds > 0 ? round(($bedCounts['booked'] / $totalBeds) * 100) : 0,
             'occupied' => $totalBeds > 0 ? round(($bedCounts['occupied'] / $totalBeds) * 100) : 0,
             'discharged' => $totalBeds > 0 ? round(($bedCounts['discharged'] / $totalBeds) * 100) : 0,
+            'housekeeping' => $totalBeds > 0 ? round(($bedCounts['housekeeping'] / $totalBeds) * 100) : 0,
         ];
 
         // Get current date and time
@@ -72,7 +77,7 @@ class DashboardController extends Controller
         })
         ->with(['bed', 'room'])
         ->orderBy('discharged_at', 'desc')
-        ->take(5)
+        ->take(3)
         ->get();
 
         // Get today's discharge count
@@ -83,12 +88,12 @@ class DashboardController extends Controller
         ->count();
 
         // Get recent activity logs
-        $activityLogs = ActivityLogger::getRecent(5);
+        $activityLogs = ActivityLogger::getRecent(3);
 
         // Check if there are more logs available
         $hasMoreLogs = ActivityLog::where('action', '!=', 'Viewed Dashboard')
             ->orderBy('created_at', 'desc')
-            ->skip(5)
+            ->skip(3)
             ->take(1)
             ->exists();
 

@@ -96,18 +96,25 @@
                                     <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Occupied</option>
                                     <option value="Discharged" {{ $bed->status == 'Discharged' ? 'selected' : '' }}>Discharge Patient</option>
+                                    <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
                                 </select>
                                 <p class="text-xs text-gray-500 mt-1">
                                     <span class="flex items-center mt-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                                         </svg>
-                                        When you select "Discharge Patient", the patient will be discharged and the bed will automatically become available.
+                                        When you select "Discharge Patient", the patient will be discharged and the bed will automatically be set to "Housekeeping" status.
+                                    </span>
+                                    <span class="flex items-center mt-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-pink-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                        </svg>
+                                        Beds in "Housekeeping" status will automatically become "Available" after 2 hours.
                                     </span>
                                 </p>
                             </div>
 
-                            <div id="patient-fields" class="{{ $bed->status == 'Available' ? 'hidden' : '' }}">
+                            <div id="patient-fields" class="{{ $bed->status == 'Available' || $bed->status == 'Housekeeping' ? 'hidden' : '' }}">
                                 <div class="mb-4">
                                     <label for="patient_name" class="block text-sm font-medium text-gray-700 mb-2">
                                         Patient Name <span class="text-red-500">*</span>
@@ -160,7 +167,7 @@
                 </div>
 
                 <!-- Patient Information Card (if not available) -->
-                @if($bed->status != 'Available')
+                @if($bed->status != 'Available' && $bed->status != 'Housekeeping')
                     <div class="border rounded-lg overflow-hidden shadow-sm">
                         <div class="px-4 py-3 border-b bg-primary/5 flex justify-between items-center">
                             <h2 class="font-semibold text-lg text-gray-800">Patient Information</h2>
@@ -213,7 +220,7 @@
 <script>
 function togglePatientFields(status) {
     const patientFields = document.getElementById('patient-fields');
-    if (status === 'Available') {
+    if (status === 'Available' || status === 'Housekeeping') {
         patientFields.classList.add('hidden');
     } else {
         patientFields.classList.remove('hidden');
@@ -223,8 +230,8 @@ function togglePatientFields(status) {
 function validateForm() {
     const statusValue = document.getElementById('status').value;
 
-    // Skip validation if bed is being marked as Available
-    if (statusValue === 'Available') {
+    // Skip validation if bed is being marked as Available or Housekeeping
+    if (statusValue === 'Available' || statusValue === 'Housekeeping') {
         return true;
     }
 

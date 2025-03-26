@@ -20,10 +20,12 @@ class Bed extends Model
         'mrn',
         'notes',
         'status_changed_at',
+        'housekeeping_started_at',
     ];
 
     protected $casts = [
         'status_changed_at' => 'datetime',
+        'housekeeping_started_at' => 'datetime',
     ];
 
     /**

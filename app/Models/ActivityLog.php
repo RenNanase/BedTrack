@@ -18,6 +18,7 @@ class ActivityLog extends Model
     protected $fillable = [
         'user_id',
         'user_name',
+        'ward_id',
         'action',
         'description',
         'model_type',
@@ -31,5 +32,13 @@ class ActivityLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the ward this activity belongs to.
+     */
+    public function ward(): BelongsTo
+    {
+        return $this->belongsTo(Ward::class);
     }
 }

@@ -22,10 +22,8 @@
             </div>
         </div>
 
-
-
         <!-- Main Dashboard Content with Activity Timeline -->
-                <div class="flex flex-col md:flex-row gap-6">
+                <div class="flex flex-col md:flex-row gap-6 mb-8">
                     <!-- Main Dashboard Content -->
                     <div class="w-full md:w-2/3">
                         <!-- Activity Timeline -->
@@ -79,27 +77,6 @@
                                     <div id="legendContent" class="p-4">
                                         <div class="space-y-4">
                                             <div>
-                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Status</h3>
-                                                <div class="space-y-2">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-                                                        <span class="text-sm">Available</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></span>
-                                                        <span class="text-sm">Booked</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-                                                        <span class="text-sm">Occupied</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-blue-500 rounded-full mr-2"></span>
-                                                        <span class="text-sm">Discharged</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div>
                                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
                                                 <div class="space-y-2">
                                                     <div class="flex items-center">
@@ -125,162 +102,117 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Combined Examples</h3>
-                                                <div class="space-y-2">
-                                                    <div class="flex items-center">
-                                                        <div class="flex items-center space-x-1 mr-2">
-                                                            <span
-                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold">♂</span>
-                                                            <span
-                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">👨</span>
-                                                        </div>
-                                                        <span class="text-sm">Male Adult</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <div class="flex items-center space-x-1 mr-2">
-                                                            <span
-                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700 font-bold">♀</span>
-                                                            <span
-                                                                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">👶</span>
-                                                        </div>
-                                                        <span class="text-sm">Female Paediatric</span>
-                                                    </div>
-                                                </div>
-                                            </div>
+
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                 </div>
 
 
+                <!-- Bed Status Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
 
-                <!-- Summary Card -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div class="p-5 border-b border-gray-200 bg-primary/5">
-                <h2 class="text-xl font-semibold text-gray-900">Ward Summary</h2>
-                <p class="text-sm text-gray-500">Overview of all beds in {{ $ward->ward_name }}</p>
-            </div>
-            <div class="p-6">
-                <div class="flex flex-col md:flex-row justify-between mb-6">
-                    <div class="mb-4 md:mb-0">
-                        <div class="text-4xl font-bold text-gray-800">{{ $totalBeds }}</div>
-                        <div class="text-sm text-gray-500">Total Beds</div>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                        <div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-600">Available</span>
-                                <span class="text-sm font-medium text-green-600">{{ $percentages['available'] }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1.5 mb-1">
-                                <div class="bg-green-500 h-2.5 rounded-full" style="width: {{ $percentages['available'] }}%"></div>
-                            </div>
-                            <div class="text-2xl font-bold text-gray-800">{{ $bedCounts['available'] }}</div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-600">Booked</span>
-                                <span class="text-sm font-medium text-yellow-600">{{ $percentages['booked'] }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1.5 mb-1">
-                                <div class="bg-yellow-500 h-2.5 rounded-full" style="width: {{ $percentages['booked'] }}%"></div>
-                            </div>
-                            <div class="text-2xl font-bold text-gray-800">{{ $bedCounts['booked'] }}</div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-600">Occupied</span>
-                                <span class="text-sm font-medium text-red-600">{{ $percentages['occupied'] }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1.5 mb-1">
-                                <div class="bg-red-500 h-2.5 rounded-full" style="width: {{ $percentages['occupied'] }}%"></div>
-                            </div>
-                            <div class="text-2xl font-bold text-gray-800">{{ $bedCounts['occupied'] }}</div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-600">Discharged</span>
-                                <span class="text-sm font-medium text-blue-600">{{ $percentages['discharged'] }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1.5 mb-1">
-                                <div class="bg-blue-500 h-2.5 rounded-full" style="width: {{ $percentages['discharged'] }}%"></div>
-                            </div>
-                            <div class="text-2xl font-bold text-gray-800">{{ $bedCounts['discharged'] }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bed Status Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-5 border-b border-gray-200 bg-green-50">
-                    <h3 class="text-lg font-medium text-gray-900">Available Beds</h3>
+                <div class="p-4 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900">Total Beds</h3>
                 </div>
-                <div class="p-5 flex items-center">
-                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-4 flex items-center">
+                    <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-3xl font-bold text-gray-900">{{ $bedCounts['available'] }}</div>
-                        <div class="text-sm text-gray-500">Beds available</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $totalBeds }}</div>
+                        <div class="text-xs text-gray-500">Total Beds</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-5 border-b border-gray-200 bg-yellow-50">
-                    <h3 class="text-lg font-medium text-gray-900">Booked Beds</h3>
+                <div class="p-4 border-b border-gray-200 bg-green-50">
+                    <h3 class="text-lg font-medium text-gray-900">Available</h3>
                 </div>
-                <div class="p-5 flex items-center">
-                    <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xl mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-4 flex items-center">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['available'] }}</div>
+                        <div class="text-xs text-gray-500">Beds available</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200 bg-yellow-50">
+                    <h3 class="text-lg font-medium text-gray-900">Booked</h3>
+                </div>
+                <div class="p-4 flex items-center">
+                    <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-3xl font-bold text-gray-900">{{ $bedCounts['booked'] }}</div>
-                        <div class="text-sm text-gray-500">Beds booked</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['booked'] }}</div>
+                        <div class="text-xs text-gray-500">Beds booked</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-5 border-b border-gray-200 bg-red-50">
-                    <h3 class="text-lg font-medium text-gray-900">Occupied Beds</h3>
+                <div class="p-4 border-b border-gray-200 bg-red-50">
+                    <h3 class="text-lg font-medium text-gray-900">Occupied</h3>
                 </div>
-                <div class="p-5 flex items-center">
-                    <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-xl mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-4 flex items-center">
+                    <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-3xl font-bold text-gray-900">{{ $bedCounts['occupied'] }}</div>
-                        <div class="text-sm text-gray-500">Beds occupied</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['occupied'] }}</div>
+                        <div class="text-xs text-gray-500">Beds occupied</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-5 border-b border-gray-200 bg-blue-50">
-                    <h3 class="text-lg font-medium text-gray-900">Today's Discharges</h3>
+                <div class="p-4 border-b border-gray-200 bg-purple-50">
+                    <h3 class="text-lg font-medium text-gray-900">Discharges</h3>
                 </div>
-                <div class="p-5 flex items-center">
-                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-4 flex items-center">
+                    <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-3xl font-bold text-gray-900">{{ $todayDischarges }}</div>
-                        <div class="text-sm text-gray-500">Patients discharged today</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $todayDischarges }}</div>
+                        <div class="text-xs text-gray-500">Today's discharges</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200 bg-pink-50">
+                    <h3 class="text-lg font-medium text-gray-900">Housekeeping</h3>
+                </div>
+                <div class="p-4 flex items-center">
+                    <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['housekeeping'] }}</div>
+                        <div class="text-xs text-gray-500">Beds in cleaning</div>
                     </div>
                 </div>
             </div>
@@ -383,11 +315,11 @@
                         <div class="p-4">
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 @foreach($room->beds as $bed)
-                                <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{ $bed->status == 'Available' ? 'border-green-300 bg-green-50' : ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' : ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' : 'border-red-300 bg-red-50')) }}">
-                                    <div class="px-3 py-2 border-b {{ $bed->status == 'Available' ? 'bg-green-100 text-green-800' : ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' : ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800')) }}">
+                                <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{ $bed->status == 'Available' ? 'border-green-300 bg-green-50' : ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' : ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' : ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' : 'border-red-300 bg-red-50'))) }}">
+                                    <div class="px-3 py-2 border-b {{ $bed->status == 'Available' ? 'bg-green-100 text-green-800' : ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' : ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' : ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' : 'bg-red-100 text-red-800'))) }}">
                                         <div class="flex justify-between items-center">
                                             <span class="font-medium">{{ $bed->bed_number }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded-full {{ $bed->status == 'Available' ? 'bg-green-200 text-green-900' : ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' : ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' : 'bg-red-200 text-red-900')) }}">
+                                            <span class="text-xs px-1.5 py-0.5 rounded-full {{ $bed->status == 'Available' ? 'bg-green-200 text-green-900' : ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' : ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' : ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' : 'bg-red-200 text-red-900'))) }}">
                                                 {{ $bed->status }}
                                             </span>
                                         </div>
@@ -397,6 +329,13 @@
                                             <div class="flex justify-between items-start">
                                                 <p class="text-sm font-medium text-gray-700">{{ $bed->patient_name ?: 'Unknown' }}</p>
                                                 <div class="flex items-center space-x-1">
+                                                    @if($bed->status == 'Housekeeping')
+                                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        </span>
+                                                    @endif
                                                     @if($bed->gender)
                                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold">
                                                             {{ $bed->gender == 'Male' ? '♂' : '♀' }}
@@ -411,8 +350,29 @@
                                             </div>
                                             @if($bed->status_changed_at)
                                                 <p class="text-xs text-gray-500 mt-1">
-                                                    {{ $bed->status == 'Discharged' ? 'Discharged' : 'Since' }}:
-                                                    {{ $bed->status_changed_at->format('M d, h:i A') }}
+                                                    @if($bed->status == 'Housekeeping')
+                                                        Started: {{ $bed->housekeeping_started_at->format('M d, h:i A') }}
+                                                        <br>
+                                                        <span class="text-pink-600">
+                                                            @php
+                                                                $minutesRemaining = Carbon\Carbon::now()->diffInMinutes($bed->housekeeping_started_at->addHours(2));
+                                                                $hoursRemaining = floor($minutesRemaining / 60);
+                                                                $minutesLeft = $minutesRemaining % 60;
+
+                                                                if ($minutesRemaining <= 0) {
+                                                                    $timeDisplay = 'Available soon';
+                                                                } elseif ($hoursRemaining > 0) {
+                                                                    $timeDisplay = $hoursRemaining . ' hour' . ($hoursRemaining > 1 ? 's' : '') . ' ' . $minutesLeft . ' minute' . ($minutesLeft > 1 || $minutesLeft == 0 ? 's' : '');
+                                                                } else {
+                                                                    $timeDisplay = $minutesLeft . ' minute' . ($minutesLeft > 1 ? 's' : '');
+                                                                }
+                                                            @endphp
+                                                            Auto-available in {{ $timeDisplay }}
+                                                        </span>
+                                                    @else
+                                                        {{ $bed->status == 'Discharged' ? 'Discharged' : 'Since' }}:
+                                                        {{ $bed->status_changed_at->format('M d, h:i A') }}
+                                                    @endif
                                                 </p>
                                             @endif
                                         @else
