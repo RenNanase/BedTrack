@@ -91,13 +91,24 @@
 
                             <div class="mb-4">
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                                <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" onchange="togglePatientFields(this.value)">
+                                <select name="status" id="status"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                    @if($bed->status == 'Available')
+                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Available</option>
+                                    <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Book</option>
+                                    <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Check-In</option>
+                                    <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
+                                    @else
                                     <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Available</option>
                                     <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Occupied</option>
                                     <option value="Discharged" {{ $bed->status == 'Discharged' ? 'selected' : '' }}>Discharge Patient</option>
                                     <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
+                                    @endif
                                 </select>
+
+
+
                                 <p class="text-xs text-gray-500 mt-1">
                                     <span class="flex items-center mt-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 mr-1" viewBox="0 0 20 20" fill="currentColor">

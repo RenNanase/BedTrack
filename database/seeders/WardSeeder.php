@@ -14,19 +14,19 @@ class WardSeeder extends Seeder
     public function run(): void
     {
         Ward::create([
-            'ward_name' => 'General Ward',
-        ]);
-
-        Ward::create([
-            'ward_name' => 'Cardiac Ward',
-        ]);
-
-        Ward::create([
-            'ward_name' => 'Pediatric Ward',
-        ]);
-
-        Ward::create([
             'ward_name' => 'Maternity Ward',
+        ]);
+
+        Ward::create([
+            'ward_name' => 'Medical Ward',
+        ]);
+
+        Ward::create([
+            'ward_name' => 'Multidisciplinary Ward',
+        ]);
+
+        Ward::create([
+            'ward_name' => 'ICU',
         ]);
     }
 }
