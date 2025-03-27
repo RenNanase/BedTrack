@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_admin')->default(false);
-            $table->boolean('is_super_admin')->default(false);
+        Schema::table('beds', function (Blueprint $table) {
+            $table->boolean('has_hazard')->default(false)->after('notes');
+            $table->text('hazard_notes')->nullable()->after('has_hazard');
         });
     }
 
@@ -22,9 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_admin');
-            $table->dropColumn('is_super_admin');
+        Schema::table('beds', function (Blueprint $table) {
+            $table->dropColumn(['has_hazard', 'hazard_notes']);
         });
     }
 };

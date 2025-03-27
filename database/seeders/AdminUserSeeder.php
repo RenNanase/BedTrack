@@ -13,13 +13,24 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create admin user
+        // Create super admin user
+        User::create([
+            'name' => 'superadmin',
+            'password' => Hash::make('password'),
+            'is_admin' => true,
+            'is_super_admin' => true,
+        ]);
+
+        // Create regular admin user
         User::create([
             'name' => 'admin',
             'password' => Hash::make('password'),
             'is_admin' => true,
+            'is_super_admin' => false,
         ]);
 
-        $this->command->info('Admin user created successfully. Username: admin, Password: password');
+        $this->command->info('Admin users created successfully.');
+        $this->command->info('Super Admin: username: superadmin, Password: password');
+        $this->command->info('Regular Admin: username: admin, Password: password');
     }
 }

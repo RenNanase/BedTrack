@@ -57,19 +57,19 @@ class BedSeeder extends Seeder
         }
 
         // Add some discharged beds for demo
-        $randomBeds = Bed::where('status', 'Available')->inRandomOrder()->limit(2)->get();
-        foreach ($randomBeds as $bed) {
-            $gender = $this->getRandomGender();
-            $bed->update([
-                'status' => 'Discharged',
-                'patient_name' => $this->getRandomName($gender),
-                'patient_category' => $this->getRandomCategory(),
-                'gender' => $gender,
-                'mrn' => $this->getRandomMRN(),
-                'notes' => $this->getRandomNotes(),
-                'status_changed_at' => Carbon::now()->subHours(rand(1, 12)), // Random time within the past 12 hours
-            ]);
-        }
+        // $randomBeds = Bed::where('status', 'Available')->inRandomOrder()->limit(2)->get();
+        // foreach ($randomBeds as $bed) {
+        //     $gender = $this->getRandomGender();
+        //     $bed->update([
+        //         'status' => 'Discharged',
+        //         'patient_name' => $this->getRandomName($gender),
+        //         'patient_category' => $this->getRandomCategory(),
+        //         'gender' => $gender,
+        //         'mrn' => $this->getRandomMRN(),
+        //         'notes' => $this->getRandomNotes(),
+        //         'status_changed_at' => Carbon::now()->subHours(rand(1, 12)), // Random time within the past 12 hours
+        //     ]);
+        // }
     }
 
     /**

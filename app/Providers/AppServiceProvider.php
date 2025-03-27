@@ -25,5 +25,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Register ward selection middleware
         Route::aliasMiddleware('ward.selection', \App\Http\Middleware\WardSelectionMiddleware::class);
+
+        // Register super admin middleware
+        Route::aliasMiddleware('super.admin', \App\Http\Middleware\SuperAdminMiddleware::class);
     }
 }

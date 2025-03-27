@@ -91,23 +91,21 @@
 
                             <div class="mb-4">
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                                <select name="status" id="status"
+                                <select name="status" id="status" onchange="togglePatientFields(this.value)"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                                     @if($bed->status == 'Available')
-                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Available</option>
+                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Ready for Patient</option>
                                     <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Book</option>
                                     <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Check-In</option>
                                     <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
                                     @else
-                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Available</option>
+                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Ready for Patient</option>
                                     <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Occupied</option>
                                     <option value="Discharged" {{ $bed->status == 'Discharged' ? 'selected' : '' }}>Discharge Patient</option>
                                     <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
                                     @endif
                                 </select>
-
-
 
                                 <p class="text-xs text-gray-500 mt-1">
                                     <span class="flex items-center mt-1">
@@ -123,6 +121,39 @@
                                         Beds in "Housekeeping" status will automatically become "Available" after 2 hours.
                                     </span>
                                 </p>
+                            </div>
+
+                            <!-- Hazard Toggle Section -->
+                            <div class="mb-4 border rounded-lg p-4 bg-gray-50">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-red-600 mr-2">💀</span>
+                                    <label for="has_hazard" class="text-sm font-semibold text-gray-700">Bed Hazard Warning</label>
+                                </div>
+
+                                <div class="flex items-center mb-2">
+                                    <input type="checkbox" name="has_hazard" id="has_hazard" value="1" class="form-checkbox h-5 w-5 text-primary"
+                                        {{ $bed->has_hazard ? 'checked' : '' }} onchange="toggleHazardNotes(this.checked)">
+                                    <label for="has_hazard" class="ml-2 text-sm text-gray-700">
+                                        Mark this bed as having a hazard
+                                    </label>
+                                </div>
+
+                                <div id="hazard_notes_container" class="{{ $bed->has_hazard ? '' : 'hidden' }}">
+                                    <label for="hazard_notes" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Hazard Details <span class="text-red-500">*</span>
+                                    </label>
+                                    <textarea name="hazard_notes" id="hazard_notes" rows="2"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                        placeholder="Describe the hazard...">{{ $bed->hazard_notes }}</textarea>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span class="flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            </svg>
+                                            This hazard will be displayed on the dashboard with a 💀 skull emoji.
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
 
                             <div id="patient-fields" class="{{ $bed->status == 'Available' || $bed->status == 'Housekeeping' ? 'hidden' : '' }}">
@@ -238,10 +269,32 @@ function togglePatientFields(status) {
     }
 }
 
+function toggleHazardNotes(isChecked) {
+    const hazardNotesContainer = document.getElementById('hazard_notes_container');
+    if (isChecked) {
+        hazardNotesContainer.classList.remove('hidden');
+    } else {
+        hazardNotesContainer.classList.add('hidden');
+    }
+}
+
 function validateForm() {
     const statusValue = document.getElementById('status').value;
+    const hasHazard = document.getElementById('has_hazard').checked;
 
-    // Skip validation if bed is being marked as Available or Housekeeping
+    // Validate hazard notes if hazard is checked
+    if (hasHazard) {
+        const hazardNotes = document.getElementById('hazard_notes').value.trim();
+        if (!hazardNotes) {
+            alert('Please provide details about the hazard in the Hazard Details field.');
+            document.getElementById('hazard_notes').classList.add('border-red-500');
+            return false;
+        } else {
+            document.getElementById('hazard_notes').classList.remove('border-red-500');
+        }
+    }
+
+    // Skip patient validation if bed is being marked as Available or Housekeeping
     if (statusValue === 'Available' || statusValue === 'Housekeeping') {
         return true;
     }

@@ -21,11 +21,14 @@ class Bed extends Model
         'notes',
         'status_changed_at',
         'housekeeping_started_at',
+        'has_hazard',
+        'hazard_notes',
     ];
 
     protected $casts = [
         'status_changed_at' => 'datetime',
         'housekeeping_started_at' => 'datetime',
+        'has_hazard' => 'boolean',
     ];
 
     /**

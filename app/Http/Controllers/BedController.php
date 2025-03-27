@@ -31,6 +31,8 @@ class BedController extends Controller
             'gender' => 'nullable|required_unless:status,Available,Housekeeping|string|max:10',
             'mrn' => 'nullable|required_unless:status,Available,Housekeeping|string|max:50',
             'notes' => 'nullable|string',
+            'has_hazard' => 'boolean',
+            'hazard_notes' => 'nullable|string|max:500',
         ]);
 
         $oldStatus = $bed->status;
@@ -103,6 +105,27 @@ class BedController extends Controller
         // Set status_changed_at if status has changed
         if ($oldStatus !== $newStatus) {
             $validated['status_changed_at'] = Carbon::now();
+        }
+
+        // Set has_hazard field if present in the request
+        if (isset($request->has_hazard)) {
+            $bed->has_hazard = $request->has_hazard;
+            if (!$request->has_hazard) {
+                $bed->hazard_notes = null; // Clear hazard notes when hazard is removed
+            } else {
+                $bed->hazard_notes = $request->hazard_notes;
+            }
+        }
+
+        // If status is changed to Available, clear patient information
+        if ($validated['status'] === 'Available' && $oldStatus !== 'Available') {
+            $validated['patient_name'] = null;
+            $validated['patient_category'] = null;
+            $validated['gender'] = null;
+            $validated['mrn'] = null;
+            $validated['notes'] = null;
+            $validated['housekeeping_started_at'] = null;
+            // Don't clear hazard information as it might be room-specific
         }
 
         $bed->update($validated);

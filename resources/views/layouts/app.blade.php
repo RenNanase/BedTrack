@@ -42,7 +42,11 @@
                             </div>
                         </div>
                         <div class="flex items-center">
-                            @if(Auth::user()->is_admin)
+                            @if(Auth::user()->is_super_admin)
+                            <a href="{{ route('super-admin.dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
+                                Super Admin Dashboard
+                            </a>
+                            @elseif(Auth::user()->is_admin)
                             <a href="{{ route('admin.dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
                                 Admin Dashboard
                             </a>

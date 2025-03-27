@@ -16,6 +16,15 @@
                 <p class="text-sm text-gray-500">Last updated: {{ $currentDateTime }}</p>
             </div>
             <div class="flex space-x-2">
+                @if($ward->ward_name === 'Nursery')
+                    <a href="{{ route('room-management.add-nursery-cribs', $ward) }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                        Add Cribs
+                    </a>
+                @else
+                    <a href="{{ route('room-management.add-room-beds', $ward) }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                        Add Room & Beds
+                    </a>
+                @endif
                 <a href="{{ route('select.ward') }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
                     Change Ward
                 </a>
@@ -102,7 +111,17 @@
                                                     </div>
                                                 </div>
                                             </div>
-
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Hazard</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-red-600 mr-2">
+                                                            💀
+                                                        </span>
+                                                        <span class="text-sm">Patient/Bed Hazard</span>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                         </div>
                                     </div>
@@ -302,19 +321,19 @@
             </div>
 
             <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    @foreach($ward->rooms as $room)
+                @if($ward->ward_name === 'Nursery')
+                    <!-- Nursery Room Layout -->
                     <div class="border rounded-lg overflow-hidden shadow-sm">
                         <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                            <h3 class="font-medium text-gray-700">{{ $room->room_name }}</h3>
+                            <h3 class="font-medium text-gray-700">{{ $ward->rooms->first()->room_name }}</h3>
                             <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                                Capacity: {{ $room->capacity }}
+                                Capacity: {{ $ward->rooms->first()->capacity }} Cribs
                             </span>
                         </div>
 
                         <div class="p-4">
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                @foreach($room->beds as $bed)
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                @foreach($ward->rooms->first()->beds as $bed)
                                 <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{ $bed->status == 'Available' ? 'border-green-300 bg-green-50' : ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' : ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' : ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' : 'border-red-300 bg-red-50'))) }}">
                                     <div class="px-3 py-2 border-b {{ $bed->status == 'Available' ? 'bg-green-100 text-green-800' : ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' : ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' : ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' : 'bg-red-100 text-red-800'))) }}">
                                         <div class="flex justify-between items-center">
@@ -329,6 +348,11 @@
                                             <div class="flex justify-between items-start">
                                                 <p class="text-sm font-medium text-gray-700">{{ $bed->patient_name ?: 'Unknown' }}</p>
                                                 <div class="flex items-center space-x-1">
+                                                    @if($bed->has_hazard)
+                                                    <span class="text-red-600" title="{{ $bed->hazard_notes }}">
+                                                        💀
+                                                    </span>
+                                                    @endif
                                                     @if($bed->status == 'Housekeeping')
                                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -376,7 +400,14 @@
                                                 </p>
                                             @endif
                                         @else
-                                            <p class="text-sm text-gray-500 italic">No patient</p>
+                                            <p class="text-sm text-gray-500 italic">
+                                                No patient
+                                                @if($bed->has_hazard)
+                                                <span class="text-red-600 float-right" title="{{ $bed->hazard_notes }}">
+                                                    💀
+                                                </span>
+                                                @endif
+                                            </p>
                                         @endif
                                     </div>
                                 </a>
@@ -384,8 +415,105 @@
                             </div>
                         </div>
                     </div>
-                    @endforeach
-                </div>
+                @else
+                    <!-- Regular Ward Layout -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        @foreach($ward->rooms as $room)
+                        <div class="border rounded-lg overflow-hidden shadow-sm">
+                            <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+                                <h3 class="font-medium text-gray-700">{{ $room->room_name }}</h3>
+                                <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                    Capacity: {{ $room->capacity }}
+                                </span>
+                            </div>
+
+                            <div class="p-4">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    @foreach($room->beds as $bed)
+                                    <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{ $bed->status == 'Available' ? 'border-green-300 bg-green-50' : ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' : ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' : ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' : 'border-red-300 bg-red-50'))) }}">
+                                        <div class="px-3 py-2 border-b {{ $bed->status == 'Available' ? 'bg-green-100 text-green-800' : ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' : ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' : ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' : 'bg-red-100 text-red-800'))) }}">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-medium">{{ $bed->bed_number }}</span>
+                                                <span class="text-xs px-1.5 py-0.5 rounded-full {{ $bed->status == 'Available' ? 'bg-green-200 text-green-900' : ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' : ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' : ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' : 'bg-red-200 text-red-900'))) }}">
+                                                    {{ $bed->status }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="p-3">
+                                            @if($bed->status != 'Available')
+                                                <div class="flex justify-between items-start">
+                                                    <p class="text-sm font-medium text-gray-700">{{ $bed->patient_name ?: 'Unknown' }}</p>
+                                                    <div class="flex items-center space-x-1">
+                                                        @if($bed->has_hazard)
+                                                        <span class="text-red-600" title="{{ $bed->hazard_notes }}">
+                                                            💀
+                                                        </span>
+                                                        @endif
+                                                        @if($bed->status == 'Housekeeping')
+                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            </span>
+                                                        @endif
+                                                        @if($bed->gender)
+                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold">
+                                                                {{ $bed->gender == 'Male' ? '♂' : '♀' }}
+                                                            </span>
+                                                        @endif
+                                                        @if($bed->patient_category)
+                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                                                {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                @if($bed->status_changed_at)
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        @if($bed->status == 'Housekeeping')
+                                                            Started: {{ $bed->housekeeping_started_at->format('M d, h:i A') }}
+                                                            <br>
+                                                            <span class="text-pink-600">
+                                                                @php
+                                                                    $minutesRemaining = Carbon\Carbon::now()->diffInMinutes($bed->housekeeping_started_at->addHours(2));
+                                                                    $hoursRemaining = floor($minutesRemaining / 60);
+                                                                    $minutesLeft = $minutesRemaining % 60;
+
+                                                                    if ($minutesRemaining <= 0) {
+                                                                        $timeDisplay = 'Available soon';
+                                                                    } elseif ($hoursRemaining > 0) {
+                                                                        $timeDisplay = $hoursRemaining . ' hour' . ($hoursRemaining > 1 ? 's' : '') . ' ' . $minutesLeft . ' minute' . ($minutesLeft > 1 || $minutesLeft == 0 ? 's' : '');
+                                                                    } else {
+                                                                        $timeDisplay = $minutesLeft . ' minute' . ($minutesLeft > 1 ? 's' : '');
+                                                                    }
+                                                                @endphp
+                                                                Auto-available in {{ $timeDisplay }}
+                                                            </span>
+                                                        @else
+                                                            {{ $bed->status == 'Discharged' ? 'Discharged' : 'Since' }}:
+                                                            {{ $bed->status_changed_at->format('M d, h:i A') }}
+                                                        @endif
+                                                    </p>
+                                                @endif
+                                            @else
+                                                <p class="text-sm text-gray-500 italic">
+                                                    No patient
+                                                    @if($bed->has_hazard)
+                                                    <span class="text-red-600 float-right" title="{{ $bed->hazard_notes }}">
+                                                        💀
+                                                    </span>
+                                                    @endif
+                                                </p>
+                                            @endif
+                                        </div>
+                                    </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
 

@@ -24,6 +24,9 @@ class WardSeeder extends Seeder
         Ward::create([
             'ward_name' => 'Multidisciplinary Ward',
         ]);
+                Ward::create([
+            'ward_name' => 'Nursery Ward',
+        ]);
 
         Ward::create([
             'ward_name' => 'ICU',
