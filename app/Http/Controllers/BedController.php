@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bed;
 use App\Models\DischargeLog;
+use App\Models\TransferLog;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -16,7 +17,22 @@ class BedController extends Controller
      */
     public function show(Bed $bed)
     {
-        return view('beds.show', compact('bed'));
+        // Get all wards except the current bed's ward
+        $wards = \App\Models\Ward::where('id', '!=', $bed->room->ward_id)->get();
+
+        // Get all available beds for transfer-out
+        $availableBeds = Bed::where('status', 'Available')
+            ->where('id', '!=', $bed->id)
+            ->with('room')
+            ->get();
+
+        // Get all beds in transfer-out status for transfer-in
+        $transferOutBeds = Bed::where('status', 'Transfer-out')
+            ->where('id', '!=', $bed->id)
+            ->with('room')
+            ->get();
+
+        return view('beds.show', compact('bed', 'wards', 'availableBeds', 'transferOutBeds'));
     }
 
     /**
@@ -25,7 +41,7 @@ class BedController extends Controller
     public function updateStatus(Request $request, Bed $bed)
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['Available', 'Booked', 'Occupied', 'Discharged', 'Housekeeping'])],
+            'status' => ['required', Rule::in(['Available', 'Booked', 'Occupied', 'Discharged', 'Housekeeping', 'Transfer-in', 'Transfer-out'])],
             'patient_name' => 'nullable|required_unless:status,Available,Housekeeping|string|max:255',
             'patient_category' => 'nullable|required_unless:status,Available,Housekeeping|string|max:255',
             'gender' => 'nullable|required_unless:status,Available,Housekeeping|string|max:10',
@@ -33,10 +49,91 @@ class BedController extends Controller
             'notes' => 'nullable|string',
             'has_hazard' => 'boolean',
             'hazard_notes' => 'nullable|string|max:500',
+            'transfer_destination_bed_id' => 'nullable|required_if:status,Transfer-out|exists:beds,id',
+            'transfer_source_bed_id' => 'nullable|required_if:status,Transfer-in|exists:beds,id',
         ]);
 
         $oldStatus = $bed->status;
         $newStatus = $validated['status'];
+
+        // Handle Transfer-out process
+        if ($newStatus === 'Transfer-out') {
+            // Validate destination bed
+            $destinationBed = Bed::findOrFail($validated['transfer_destination_bed_id']);
+
+            if ($destinationBed->status !== 'Available') {
+                return back()->with('error', 'Destination bed is not available for transfer.');
+            }
+
+            // Create transfer log entry
+            TransferLog::create([
+                'source_bed_id' => $bed->id,
+                'destination_bed_id' => $destinationBed->id,
+                'source_room_id' => $bed->room_id,
+                'destination_room_id' => $destinationBed->room_id,
+                'patient_name' => $bed->patient_name,
+                'patient_category' => $bed->patient_category,
+                'gender' => $bed->gender,
+                'mrn' => $bed->mrn,
+                'notes' => $bed->notes,
+                'transferred_at' => Carbon::now(),
+            ]);
+
+            // Log the transfer activity
+            ActivityLogger::log(
+                'Transfer Patient',
+                "Transferred patient {$bed->patient_name} from {$bed->room->room_name} - {$bed->bed_number} to {$destinationBed->room->room_name} - {$destinationBed->bed_number}",
+                Bed::class,
+                $bed->id
+            );
+
+            // Update destination bed
+            $destinationBed->update([
+                'status' => 'Transfer-in',
+                'patient_name' => $bed->patient_name,
+                'patient_category' => $bed->patient_category,
+                'gender' => $bed->gender,
+                'mrn' => $bed->mrn,
+                'notes' => $bed->notes,
+                'status_changed_at' => Carbon::now(),
+            ]);
+
+            // Clear source bed
+            $bed->update([
+                'status' => 'Available',
+                'patient_name' => null,
+                'patient_category' => null,
+                'gender' => null,
+                'mrn' => null,
+                'notes' => null,
+                'status_changed_at' => Carbon::now(),
+            ]);
+
+            return redirect()->route('dashboard')->with('success', "Patient transferred successfully to {$destinationBed->room->room_name} - {$destinationBed->bed_number}");
+        }
+
+        // Handle Transfer-in process
+        if ($newStatus === 'Transfer-in') {
+            // Validate source bed
+            $sourceBed = Bed::findOrFail($validated['transfer_source_bed_id']);
+
+            if ($sourceBed->status !== 'Transfer-out') {
+                return back()->with('error', 'Source bed is not in transfer-out status.');
+            }
+
+            // Update bed status to Occupied
+            $bed->update([
+                'status' => 'Occupied',
+                'patient_name' => $sourceBed->patient_name,
+                'patient_category' => $sourceBed->patient_category,
+                'gender' => $sourceBed->gender,
+                'mrn' => $sourceBed->mrn,
+                'notes' => $sourceBed->notes,
+                'status_changed_at' => Carbon::now(),
+            ]);
+
+            return redirect()->route('dashboard')->with('success', "Patient transferred in successfully to {$bed->room->room_name} - {$bed->bed_number}");
+        }
 
         // Handle Discharge process
         if ($newStatus === 'Discharged') {

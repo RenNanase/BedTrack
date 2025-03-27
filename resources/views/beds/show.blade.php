@@ -98,6 +98,18 @@
                                     <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Book</option>
                                     <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Check-In</option>
                                     <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
+                                    @elseif($bed->status == 'Occupied')
+                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Ready for Patient</option>
+                                    <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Booked</option>
+                                    <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Occupied</option>
+                                    <option value="Discharged" {{ $bed->status == 'Discharged' ? 'selected' : '' }}>Discharge Patient</option>
+                                    <option value="Transfer-out" {{ $bed->status == 'Transfer-out' ? 'selected' : '' }}>Transfer Patient Out</option>
+                                    <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
+                                    @elseif($bed->status == 'Transfer-in')
+                                    <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Ready for Patient</option>
+                                    <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Booked</option>
+                                    <option value="Occupied" {{ $bed->status == 'Occupied' ? 'selected' : '' }}>Complete Transfer</option>
+                                    <option value="Housekeeping" {{ $bed->status == 'Housekeeping' ? 'selected' : '' }}>Housekeeping</option>
                                     @else
                                     <option value="Available" {{ $bed->status == 'Available' ? 'selected' : '' }}>Ready for Patient</option>
                                     <option value="Booked" {{ $bed->status == 'Booked' ? 'selected' : '' }}>Booked</option>
@@ -123,40 +135,80 @@
                                 </p>
                             </div>
 
-                            <!-- Hazard Toggle Section -->
-                            <div class="mb-4 border rounded-lg p-4 bg-gray-50">
-                                <div class="flex items-center mb-2">
-                                    <span class="text-red-600 mr-2">💀</span>
-                                    <label for="has_hazard" class="text-sm font-semibold text-gray-700">Bed Hazard Warning</label>
-                                </div>
+                            <!-- Transfer Destination Bed Selection (shown only when Transfer-out is selected) -->
+                            <div id="transferDestinationBed" class="mb-4 hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Destination</label>
+                                <div class="space-y-4">
+                                    <!-- Ward Selection -->
+                                    <div>
+                                        <label for="transfer_ward_id" class="block text-sm font-medium text-gray-700 mb-1">Select Ward</label>
+                                        <select name="transfer_ward_id" id="transfer_ward_id" onchange="loadRooms(this.value)"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <option value="">Select a ward...</option>
+                                            @foreach($wards as $ward)
+                                                <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                <div class="flex items-center mb-2">
-                                    <input type="checkbox" name="has_hazard" id="has_hazard" value="1" class="form-checkbox h-5 w-5 text-primary"
-                                        {{ $bed->has_hazard ? 'checked' : '' }} onchange="toggleHazardNotes(this.checked)">
-                                    <label for="has_hazard" class="ml-2 text-sm text-gray-700">
-                                        Mark this bed as having a hazard
-                                    </label>
-                                </div>
+                                    <!-- Room Selection -->
+                                    <div id="transfer_room_container" class="hidden">
+                                        <label for="transfer_room_id" class="block text-sm font-medium text-gray-700 mb-1">Select Room</label>
+                                        <select name="transfer_room_id" id="transfer_room_id" onchange="loadBeds(this.value)"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <option value="">Select a room...</option>
+                                        </select>
+                                    </div>
 
-                                <div id="hazard_notes_container" class="{{ $bed->has_hazard ? '' : 'hidden' }}">
-                                    <label for="hazard_notes" class="block text-sm font-medium text-gray-700 mb-1">
-                                        Hazard Details <span class="text-red-500">*</span>
-                                    </label>
-                                    <textarea name="hazard_notes" id="hazard_notes" rows="2"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                        placeholder="Describe the hazard...">{{ $bed->hazard_notes }}</textarea>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        <span class="flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                            </svg>
-                                            This hazard will be displayed on the dashboard with a 💀 skull emoji.
-                                        </span>
-                                    </p>
+                                    <!-- Bed Selection -->
+                                    <div id="transfer_bed_container" class="hidden">
+                                        <label for="transfer_destination_bed_id" class="block text-sm font-medium text-gray-700 mb-1">Select Bed</label>
+                                        <select name="transfer_destination_bed_id" id="transfer_destination_bed_id"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <option value="">Select a bed...</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div id="patient-fields" class="{{ $bed->status == 'Available' || $bed->status == 'Housekeeping' ? 'hidden' : '' }}">
+                            <!-- Transfer Source Bed Selection (shown only when Transfer-in is selected) -->
+                            <div id="transferSourceBed" class="mb-4 hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Source</label>
+                                <div class="space-y-4">
+                                    <!-- Ward Selection -->
+                                    <div>
+                                        <label for="source_ward_id" class="block text-sm font-medium text-gray-700 mb-1">Select Ward</label>
+                                        <select name="source_ward_id" id="source_ward_id" onchange="loadSourceRooms(this.value)"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <option value="">Select a ward...</option>
+                                            @foreach($wards as $ward)
+                                                <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <!-- Room Selection -->
+                                    <div id="source_room_container" class="hidden">
+                                        <label for="source_room_id" class="block text-sm font-medium text-gray-700 mb-1">Select Room</label>
+                                        <select name="source_room_id" id="source_room_id" onchange="loadSourceBeds(this.value)"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <option value="">Select a room...</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Bed Selection -->
+                                    <div id="source_bed_container" class="hidden">
+                                        <label for="transfer_source_bed_id" class="block text-sm font-medium text-gray-700 mb-1">Select Bed</label>
+                                        <select name="transfer_source_bed_id" id="transfer_source_bed_id"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <option value="">Select a bed...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Patient Information Fields -->
+                            <div id="patientFields" class="space-y-4 {{ in_array($bed->status, ['Available', 'Housekeeping']) ? 'hidden' : '' }}">
                                 <div class="mb-4">
                                     <label for="patient_name" class="block text-sm font-medium text-gray-700 mb-2">
                                         Patient Name <span class="text-red-500">*</span>
@@ -196,6 +248,39 @@
                                 <div class="mb-4">
                                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
                                     <textarea name="notes" id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">{{ $bed->notes }}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Hazard Toggle Section -->
+                            <div class="mb-4 border rounded-lg p-4 bg-gray-50">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-red-600 mr-2">💀</span>
+                                    <label for="has_hazard" class="text-sm font-semibold text-gray-700">Bed Hazard Warning</label>
+                                </div>
+
+                                <div class="flex items-center mb-2">
+                                    <input type="checkbox" name="has_hazard" id="has_hazard" value="1" class="form-checkbox h-5 w-5 text-primary"
+                                        {{ $bed->has_hazard ? 'checked' : '' }} onchange="toggleHazardNotes(this.checked)">
+                                    <label for="has_hazard" class="ml-2 text-sm text-gray-700">
+                                        Mark this bed as having a hazard
+                                    </label>
+                                </div>
+
+                                <div id="hazard_notes_container" class="{{ $bed->has_hazard ? '' : 'hidden' }}">
+                                    <label for="hazard_notes" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Hazard Details <span class="text-red-500">*</span>
+                                    </label>
+                                    <textarea name="hazard_notes" id="hazard_notes" rows="2"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                        placeholder="Describe the hazard...">{{ $bed->hazard_notes }}</textarea>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span class="flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            </svg>
+                                            This hazard will be displayed on the dashboard with a 💀 skull emoji.
+                                        </span>
+                                    </p>
                                 </div>
                             </div>
 
@@ -261,11 +346,26 @@
 
 <script>
 function togglePatientFields(status) {
-    const patientFields = document.getElementById('patient-fields');
-    if (status === 'Available' || status === 'Housekeeping') {
-        patientFields.classList.add('hidden');
-    } else {
+    const patientFields = document.getElementById('patientFields');
+    const transferDestinationBed = document.getElementById('transferDestinationBed');
+    const transferSourceBed = document.getElementById('transferSourceBed');
+
+    // Hide all fields first
+    patientFields.classList.add('hidden');
+    transferDestinationBed.classList.add('hidden');
+    transferSourceBed.classList.add('hidden');
+
+    // Show relevant fields based on status
+    if (['Booked', 'Occupied', 'Transfer-out', 'Transfer-in'].includes(status)) {
         patientFields.classList.remove('hidden');
+    }
+
+    if (status === 'Transfer-out') {
+        transferDestinationBed.classList.remove('hidden');
+    }
+
+    if (status === 'Transfer-in') {
+        transferSourceBed.classList.remove('hidden');
     }
 }
 
@@ -329,6 +429,187 @@ function validateForm() {
     }
 
     return isValid;
+}
+
+// Add these new functions for handling the hierarchical selection
+function loadRooms(wardId) {
+    const roomContainer = document.getElementById('transfer_room_container');
+    const bedContainer = document.getElementById('transfer_bed_container');
+    const roomSelect = document.getElementById('transfer_room_id');
+    const bedSelect = document.getElementById('transfer_destination_bed_id');
+
+    // Reset and hide dependent selects
+    roomSelect.innerHTML = '<option value="">Select a room...</option>';
+    bedSelect.innerHTML = '<option value="">Select a bed...</option>';
+    roomContainer.classList.add('hidden');
+    bedContainer.classList.add('hidden');
+
+    if (!wardId) return;
+
+    // Show loading state
+    roomSelect.innerHTML = '<option value="">Loading rooms...</option>';
+    roomContainer.classList.remove('hidden');
+
+    // Fetch rooms for the selected ward
+    fetch(`/wards/${wardId}/rooms`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(rooms => {
+        roomSelect.innerHTML = '<option value="">Select a room...</option>';
+        if (rooms.length === 0) {
+            roomSelect.innerHTML += '<option value="" disabled>No rooms available</option>';
+        } else {
+            rooms.forEach(room => {
+                roomSelect.innerHTML += `<option value="${room.id}">${room.room_name}</option>`;
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading rooms:', error);
+        roomSelect.innerHTML = '<option value="">Error loading rooms. Please try again.</option>';
+    });
+}
+
+function loadBeds(roomId) {
+    const bedContainer = document.getElementById('transfer_bed_container');
+    const bedSelect = document.getElementById('transfer_destination_bed_id');
+
+    // Reset and hide bed select
+    bedSelect.innerHTML = '<option value="">Select a bed...</option>';
+    bedContainer.classList.add('hidden');
+
+    if (!roomId) return;
+
+    // Show loading state
+    bedSelect.innerHTML = '<option value="">Loading beds...</option>';
+    bedContainer.classList.remove('hidden');
+
+    // Fetch available beds for the selected room
+    fetch(`/rooms/${roomId}/available-beds`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(beds => {
+        bedSelect.innerHTML = '<option value="">Select a bed...</option>';
+        if (beds.length === 0) {
+            bedSelect.innerHTML += '<option value="" disabled>No available beds</option>';
+        } else {
+            beds.forEach(bed => {
+                bedSelect.innerHTML += `<option value="${bed.id}">${bed.bed_number}</option>`;
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading beds:', error);
+        bedSelect.innerHTML = '<option value="">Error loading beds. Please try again.</option>';
+    });
+}
+
+function loadSourceRooms(wardId) {
+    const roomContainer = document.getElementById('source_room_container');
+    const bedContainer = document.getElementById('source_bed_container');
+    const roomSelect = document.getElementById('source_room_id');
+    const bedSelect = document.getElementById('transfer_source_bed_id');
+
+    // Reset and hide dependent selects
+    roomSelect.innerHTML = '<option value="">Select a room...</option>';
+    bedSelect.innerHTML = '<option value="">Select a bed...</option>';
+    roomContainer.classList.add('hidden');
+    bedContainer.classList.add('hidden');
+
+    if (!wardId) return;
+
+    // Show loading state
+    roomSelect.innerHTML = '<option value="">Loading rooms...</option>';
+    roomContainer.classList.remove('hidden');
+
+    // Fetch rooms for the selected ward
+    fetch(`/wards/${wardId}/rooms`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(rooms => {
+        roomSelect.innerHTML = '<option value="">Select a room...</option>';
+        if (rooms.length === 0) {
+            roomSelect.innerHTML += '<option value="" disabled>No rooms available</option>';
+        } else {
+            rooms.forEach(room => {
+                roomSelect.innerHTML += `<option value="${room.id}">${room.room_name}</option>`;
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading rooms:', error);
+        roomSelect.innerHTML = '<option value="">Error loading rooms. Please try again.</option>';
+    });
+}
+
+function loadSourceBeds(roomId) {
+    const bedContainer = document.getElementById('source_bed_container');
+    const bedSelect = document.getElementById('transfer_source_bed_id');
+
+    // Reset and hide bed select
+    bedSelect.innerHTML = '<option value="">Select a bed...</option>';
+    bedContainer.classList.add('hidden');
+
+    if (!roomId) return;
+
+    // Show loading state
+    bedSelect.innerHTML = '<option value="">Loading beds...</option>';
+    bedContainer.classList.remove('hidden');
+
+    // Fetch transfer-out beds for the selected room
+    fetch(`/rooms/${roomId}/transfer-out-beds`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(beds => {
+        bedSelect.innerHTML = '<option value="">Select a bed...</option>';
+        if (beds.length === 0) {
+            bedSelect.innerHTML += '<option value="" disabled>No transfer-out beds available</option>';
+        } else {
+            beds.forEach(bed => {
+                bedSelect.innerHTML += `<option value="${bed.id}">${bed.bed_number}</option>`;
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading beds:', error);
+        bedSelect.innerHTML = '<option value="">Error loading beds. Please try again.</option>';
+    });
 }
 </script>
 @endsection

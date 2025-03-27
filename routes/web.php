@@ -8,7 +8,9 @@ use App\Http\Controllers\WardController;
 use App\Http\Controllers\NurseryWardController;
 use App\Http\Controllers\RoomBedManagementController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\TransferController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -65,3 +67,48 @@ Route::get('/ward/{ward}/add-nursery-cribs', [RoomBedManagementController::class
 Route::post('/ward/{ward}/store-nursery-cribs', [RoomBedManagementController::class, 'storeNurseryCribs'])->name('room-management.store-nursery-cribs');
 Route::get('/ward/{ward}/add-room-beds', [RoomBedManagementController::class, 'addRoomBeds'])->name('room-management.add-room-beds');
 Route::post('/ward/{ward}/store-room-beds', [RoomBedManagementController::class, 'storeRoomBeds'])->name('room-management.store-room-beds');
+
+// Ward and Room Routes for Transfer
+Route::get('/wards/{ward}/rooms', function (App\Models\Ward $ward) {
+    try {
+        Log::info('Fetching rooms for ward: ' . $ward->id);
+        $rooms = $ward->rooms()->select('id', 'room_name')->get();
+        Log::info('Found rooms: ' . $rooms->count());
+        return response()->json($rooms);
+    } catch (\Exception $e) {
+        Log::error('Error fetching rooms for ward: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to load rooms'], 500);
+    }
+})->name('ward.rooms');
+
+Route::get('/rooms/{room}/available-beds', function (App\Models\Room $room) {
+    try {
+        Log::info('Fetching available beds for room: ' . $room->id);
+        $beds = $room->beds()
+            ->where('status', 'Available')
+            ->select('id', 'bed_number')
+            ->get();
+        Log::info('Found available beds: ' . $beds->count());
+        return response()->json($beds);
+    } catch (\Exception $e) {
+        Log::error('Error fetching available beds for room: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to load beds'], 500);
+    }
+})->name('room.available-beds');
+
+Route::get('/rooms/{room}/transfer-out-beds', function (App\Models\Room $room) {
+    try {
+        Log::info('Fetching transfer-out beds for room: ' . $room->id);
+        $beds = $room->beds()
+            ->where('status', 'Transfer-out')
+            ->select('id', 'bed_number')
+            ->get();
+        Log::info('Found transfer-out beds: ' . $beds->count());
+        return response()->json($beds);
+    } catch (\Exception $e) {
+        Log::error('Error fetching transfer-out beds for room: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to load beds'], 500);
+    }
+})->name('room.transfer-out-beds');
+
+Route::get('/transfers', [TransferController::class, 'index'])->name('transfers.index');

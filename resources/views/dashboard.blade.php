@@ -131,107 +131,122 @@
 
 
                 <!-- Bed Status Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-gray-50">
-                    <h3 class="text-lg font-medium text-gray-900">Total Beds</h3>
+                <div class="p-3 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-sm font-medium text-gray-900">Total Beds</h3>
                 </div>
-                <div class="p-4 flex items-center">
-                    <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $totalBeds }}</div>
-                        <div class="text-xs text-gray-500">Total Beds</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $totalBeds }}</div>
+                        <div class="text-xs text-gray-500">Total</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-green-50">
-                    <h3 class="text-lg font-medium text-gray-900">Available</h3>
+                <div class="p-3 border-b border-gray-200 bg-green-50">
+                    <h3 class="text-sm font-medium text-gray-900">Available</h3>
                 </div>
-                <div class="p-4 flex items-center">
-                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['available'] }}</div>
-                        <div class="text-xs text-gray-500">Beds available</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['available'] }}</div>
+                        <div class="text-xs text-gray-500">Available</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-yellow-50">
-                    <h3 class="text-lg font-medium text-gray-900">Booked</h3>
+                <div class="p-3 border-b border-gray-200 bg-yellow-50">
+                    <h3 class="text-sm font-medium text-gray-900">Booked</h3>
                 </div>
-                <div class="p-4 flex items-center">
-                    <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['booked'] }}</div>
-                        <div class="text-xs text-gray-500">Beds booked</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['booked'] }}</div>
+                        <div class="text-xs text-gray-500">Booked</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-red-50">
-                    <h3 class="text-lg font-medium text-gray-900">Occupied</h3>
+                <div class="p-3 border-b border-gray-200 bg-red-50">
+                    <h3 class="text-sm font-medium text-gray-900">Occupied</h3>
                 </div>
-                <div class="p-4 flex items-center">
-                    <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['occupied'] }}</div>
-                        <div class="text-xs text-gray-500">Beds occupied</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['occupied'] }}</div>
+                        <div class="text-xs text-gray-500">Occupied</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-purple-50">
-                    <h3 class="text-lg font-medium text-gray-900">Discharges</h3>
+                <div class="p-3 border-b border-gray-200 bg-purple-50">
+                    <h3 class="text-sm font-medium text-gray-900">Discharges</h3>
                 </div>
-                <div class="p-4 flex items-center">
-                    <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $todayDischarges }}</div>
-                        <div class="text-xs text-gray-500">Today's discharges</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $todayDischarges }}</div>
+                        <div class="text-xs text-gray-500">Today's</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-pink-50">
-                    <h3 class="text-lg font-medium text-gray-900">Housekeeping</h3>
+                <div class="p-3 border-b border-gray-200 bg-pink-50">
+                    <h3 class="text-sm font-medium text-gray-900">Housekeeping</h3>
                 </div>
-                <div class="p-4 flex items-center">
-                    <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white text-xl mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $bedCounts['housekeeping'] }}</div>
-                        <div class="text-xs text-gray-500">Beds in cleaning</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['housekeeping'] }}</div>
+                        <div class="text-xs text-gray-500">Cleaning</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-3 border-b border-gray-200 bg-orange-50">
+                    <h3 class="text-sm font-medium text-gray-900">Transfer In</h3>
+                </div>
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['transfer_in'] ?? 0 }}</div>
+                        <div class="text-xs text-gray-500">Transfer In</div>
                     </div>
                 </div>
             </div>
@@ -313,6 +328,87 @@
             </div>
         </div>
 
+        <!-- Recent Transfers -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Recent Transfer Ins -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Recent Transfer Ins</h3>
+                    <a href="{{ route('transfers.index', ['type' => 'in']) }}" class="text-sm text-primary hover:text-primary-dark">
+                        View All
+                    </a>
+                </div>
+                <div class="space-y-4">
+                    @forelse($recentTransfers['transfer_ins'] as $transfer)
+                        <div class="border-b border-gray-200 pb-4 last:border-0">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">{{ $transfer->patient_name }}</h4>
+                                    <p class="text-sm text-gray-500">
+                                        From: {{ $transfer->sourceBed->room->ward->ward_name }} -
+                                        {{ $transfer->sourceBed->room->room_name }} -
+                                        Bed {{ $transfer->sourceBed->bed_number }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        To: {{ $transfer->destinationBed->room->ward->ward_name }} -
+                                        {{ $transfer->destinationBed->room->room_name }} -
+                                        Bed {{ $transfer->destinationBed->bed_number }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ $transfer->patient_category }} | {{ $transfer->gender }} | MRN: {{ $transfer->mrn }} | {{ $transfer->sourceBed->has_hazard ? '💀 Hazard' : '' }}
+                                    </p>
+                                </div>
+                                <span class="text-sm text-gray-500">
+                                    {{ $transfer->transferred_at->format('d M Y H:i') }}
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-gray-500 text-sm">No recent transfer ins</p>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Recent Transfer Outs -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Recent Transfer Outs</h3>
+                    <a href="{{ route('transfers.index', ['type' => 'out']) }}" class="text-sm text-primary hover:text-primary-dark">
+                        View All
+                    </a>
+                </div>
+                <div class="space-y-4">
+                    @forelse($recentTransfers['transfer_outs'] as $transfer)
+                        <div class="border-b border-gray-200 pb-4 last:border-0">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium text-gray-900">{{ $transfer->patient_name }}</h4>
+                                    <p class="text-sm text-gray-500">
+                                        From: {{ $transfer->sourceBed->room->ward->ward_name }} -
+                                        {{ $transfer->sourceBed->room->room_name }} -
+                                        Bed {{ $transfer->sourceBed->bed_number }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        To: {{ $transfer->destinationBed->room->ward->ward_name }} -
+                                        {{ $transfer->destinationBed->room->room_name }} -
+                                        Bed {{ $transfer->destinationBed->bed_number }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ $transfer->patient_category }} | {{ $transfer->gender }} | MRN: {{ $transfer->mrn }} | {{ $transfer->sourceBed->has_hazard ? '💀 Hazard' : '' }}
+                                    </p>
+                                </div>
+                                <span class="text-sm text-gray-500">
+                                    {{ $transfer->transferred_at->format('d M Y H:i') }}
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-gray-500 text-sm">No recent transfer outs</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
         <!-- Room and Bed Visualization -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
             <div class="p-5 border-b border-gray-200 bg-primary/5">
@@ -334,11 +430,32 @@
                         <div class="p-4">
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                 @foreach($ward->rooms->first()->beds as $bed)
-                                <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{ $bed->status == 'Available' ? 'border-green-300 bg-green-50' : ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' : ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' : ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' : 'border-red-300 bg-red-50'))) }}">
-                                    <div class="px-3 py-2 border-b {{ $bed->status == 'Available' ? 'bg-green-100 text-green-800' : ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' : ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' : ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' : 'bg-red-100 text-red-800'))) }}">
+                                <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
+                                    $bed->status == 'Available' ? 'border-green-300 bg-green-50' :
+                                    ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' :
+                                    ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' :
+                                    ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' :
+                                    ($bed->status == 'Transfer-out' ? 'border-orange-300 bg-orange-50' :
+                                    ($bed->status == 'Transfer-in' ? 'border-purple-300 bg-purple-50' :
+                                    'border-red-300 bg-red-50'))))) }}">
+                                    <div class="px-3 py-2 border-b {{
+                                        $bed->status == 'Available' ? 'bg-green-100 text-green-800' :
+                                        ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' :
+                                        ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' :
+                                        ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' :
+                                        ($bed->status == 'Transfer-out' ? 'bg-orange-100 text-orange-800' :
+                                        ($bed->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
+                                        'bg-red-100 text-red-800'))))) }}">
                                         <div class="flex justify-between items-center">
                                             <span class="font-medium">{{ $bed->bed_number }}</span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded-full {{ $bed->status == 'Available' ? 'bg-green-200 text-green-900' : ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' : ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' : ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' : 'bg-red-200 text-red-900'))) }}">
+                                            <span class="text-xs px-1.5 py-0.5 rounded-full {{
+                                                $bed->status == 'Available' ? 'bg-green-200 text-green-900' :
+                                                ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' :
+                                                ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' :
+                                                ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' :
+                                                ($bed->status == 'Transfer-out' ? 'bg-orange-200 text-orange-900' :
+                                                ($bed->status == 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
+                                                'bg-red-200 text-red-900'))))) }}">
                                                 {{ $bed->status }}
                                             </span>
                                         </div>
@@ -430,11 +547,32 @@
                             <div class="p-4">
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     @foreach($room->beds as $bed)
-                                    <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{ $bed->status == 'Available' ? 'border-green-300 bg-green-50' : ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' : ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' : ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' : 'border-red-300 bg-red-50'))) }}">
-                                        <div class="px-3 py-2 border-b {{ $bed->status == 'Available' ? 'bg-green-100 text-green-800' : ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' : ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' : ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' : 'bg-red-100 text-red-800'))) }}">
+                                    <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
+                                        $bed->status == 'Available' ? 'border-green-300 bg-green-50' :
+                                        ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' :
+                                        ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' :
+                                        ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' :
+                                        ($bed->status == 'Transfer-out' ? 'border-orange-300 bg-orange-50' :
+                                        ($bed->status == 'Transfer-in' ? 'border-purple-300 bg-purple-50' :
+                                        'border-red-300 bg-red-50'))))) }}">
+                                        <div class="px-3 py-2 border-b {{
+                                            $bed->status == 'Available' ? 'bg-green-100 text-green-800' :
+                                            ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' :
+                                            ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' :
+                                            ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' :
+                                            ($bed->status == 'Transfer-out' ? 'bg-orange-100 text-orange-800' :
+                                            ($bed->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
+                                            'bg-red-100 text-red-800'))))) }}">
                                             <div class="flex justify-between items-center">
                                                 <span class="font-medium">{{ $bed->bed_number }}</span>
-                                                <span class="text-xs px-1.5 py-0.5 rounded-full {{ $bed->status == 'Available' ? 'bg-green-200 text-green-900' : ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' : ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' : ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' : 'bg-red-200 text-red-900'))) }}">
+                                                <span class="text-xs px-1.5 py-0.5 rounded-full {{
+                                                    $bed->status == 'Available' ? 'bg-green-200 text-green-900' :
+                                                    ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' :
+                                                    ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' :
+                                                    ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' :
+                                                    ($bed->status == 'Transfer-out' ? 'bg-orange-200 text-orange-900' :
+                                                    ($bed->status == 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
+                                                    'bg-red-200 text-red-900'))))) }}">
                                                     {{ $bed->status }}
                                                 </span>
                                             </div>

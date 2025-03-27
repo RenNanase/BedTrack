@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\ActivityLog;
+use App\Models\TransferLog;
 
 class DashboardController extends Controller
 {
@@ -97,6 +98,8 @@ class DashboardController extends Controller
             ->take(1)
             ->exists();
 
+        $recentTransfers = $this->getRecentTransfers();
+
         return view('dashboard', compact(
             'ward',
             'bedCounts',
@@ -106,7 +109,79 @@ class DashboardController extends Controller
             'recentDischarges',
             'todayDischarges',
             'activityLogs',
-            'hasMoreLogs'
+            'hasMoreLogs',
+            'recentTransfers'
         ));
+    }
+
+    private function getRecentDischarges()
+    {
+        return Bed::where('status', 'Discharged')
+            ->whereNotNull('discharged_at')
+            ->orderBy('discharged_at', 'desc')
+            ->take(5)
+            ->get();
+    }
+
+    private function getRecentTransfers()
+    {
+        $selectedWardId = session('selected_ward_id');
+
+        if (!$selectedWardId) {
+            return [
+                'transfer_ins' => collect(),
+                'transfer_outs' => collect()
+            ];
+        }
+
+        $transferIns = TransferLog::with([
+            'sourceBed.room.ward',
+            'destinationBed.room.ward'
+        ])
+        ->whereHas('destinationBed.room.ward', function($query) use ($selectedWardId) {
+            $query->where('id', $selectedWardId);
+        })
+        ->orderBy('transferred_at', 'desc')
+        ->take(3)
+        ->get();
+
+        $transferOuts = TransferLog::with([
+            'sourceBed.room.ward',
+            'destinationBed.room.ward'
+        ])
+        ->whereHas('sourceBed.room.ward', function($query) use ($selectedWardId) {
+            $query->where('id', $selectedWardId);
+        })
+        ->orderBy('transferred_at', 'desc')
+        ->take(3)
+        ->get();
+
+        return [
+            'transfer_ins' => $transferIns,
+            'transfer_outs' => $transferOuts
+        ];
+    }
+
+    private function getWardStats($ward)
+    {
+        $totalBeds = $ward->rooms->sum('capacity');
+        $bedCounts = [
+            'available' => $ward->rooms->flatMap->beds->where('status', 'Available')->count(),
+            'booked' => $ward->rooms->flatMap->beds->where('status', 'Booked')->count(),
+            'occupied' => $ward->rooms->flatMap->beds->where('status', 'Occupied')->count(),
+            'housekeeping' => $ward->rooms->flatMap->beds->where('status', 'Housekeeping')->count(),
+            'transfer_in' => $ward->rooms->flatMap->beds->where('status', 'Transfer-in')->count(),
+        ];
+        $todayDischarges = $ward->rooms->flatMap->beds
+            ->where('status', 'Discharged')
+            ->whereNotNull('discharged_at')
+            ->whereDate('discharged_at', Carbon::today())
+            ->count();
+
+        return [
+            'totalBeds' => $totalBeds,
+            'bedCounts' => $bedCounts,
+            'todayDischarges' => $todayDischarges
+        ];
     }
 }
