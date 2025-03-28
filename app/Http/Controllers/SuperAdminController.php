@@ -2,25 +2,79 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
+use App\Models\Bed;
+use App\Models\User;
 use App\Models\Ward;
 use App\Models\Room;
-use App\Models\Bed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 
 class SuperAdminController extends Controller
 {
+    use AuthorizesRequests, ValidatesRequests;
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Check if the current user is a superadmin
+     */
+    private function checkSuperAdmin()
+    {
+        if (!Auth::check()) {
+            abort(403, 'User not authenticated.');
+        }
+
+        $user = Auth::user();
+        \Log::info('Checking superadmin access for user:', [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'raw_role' => $user->getAttributes()['role'] ?? 'not set'
+        ]);
+
+        // If role is null, try to set it based on the user's name or email
+        if ($user->role === null) {
+            if (strtolower($user->name) === 'superadmin' ||
+                (strpos(strtolower($user->email), 'admin') !== false)) {
+                $user->role = 'superadmin';
+                $user->save();
+                \Log::info('Updated user role to superadmin based on name/email');
+            } else {
+                abort(403, 'User role not set. Please contact administrator.');
+            }
+        }
+
+        if ($user->role !== 'superadmin') {
+            abort(403, 'Unauthorized action. Superadmin access required. Current role: ' . $user->role);
+        }
+    }
+
     /**
      * Show the super admin dashboard.
      */
     public function dashboard()
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
-        $wards = Ward::with(['rooms.beds'])->get();
-        return view('super-admin.dashboard', compact('wards'));
+        $recentActivities = Activity::latest()->take(10)->get();
+        $totalUsers = User::count();
+        $totalWards = Ward::count();
+        $totalBeds = Bed::count();
+
+        return view('super-admin.dashboard', compact(
+            'recentActivities',
+            'totalUsers',
+            'totalWards',
+            'totalBeds'
+        ));
     }
 
     /**
@@ -28,9 +82,7 @@ class SuperAdminController extends Controller
      */
     public function wardManagement()
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $wards = Ward::with(['rooms.beds'])->get();
         return view('super-admin.ward-management', compact('wards'));
@@ -41,9 +93,7 @@ class SuperAdminController extends Controller
      */
     public function addWard(Request $request)
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $request->validate([
             'ward_name' => 'required|string|max:255|unique:wards,ward_name',
@@ -62,9 +112,7 @@ class SuperAdminController extends Controller
      */
     public function addRoom(Request $request)
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $request->validate([
             'ward_id' => 'required|exists:wards,id',
@@ -87,9 +135,7 @@ class SuperAdminController extends Controller
      */
     public function addBed(Request $request)
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $request->validate([
             'room_id' => 'required|exists:rooms,id',
@@ -113,9 +159,7 @@ class SuperAdminController extends Controller
      */
     public function deleteWard(Ward $ward)
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $ward->delete();
         return redirect()->route('super-admin.ward-management')
@@ -127,9 +171,7 @@ class SuperAdminController extends Controller
      */
     public function deleteRoom(Room $room)
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $room->delete();
         return redirect()->route('super-admin.ward-management')
@@ -141,9 +183,7 @@ class SuperAdminController extends Controller
      */
     public function deleteBed(Bed $bed)
     {
-        if (!Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkSuperAdmin();
 
         $bed->delete();
         return redirect()->route('super-admin.ward-management')

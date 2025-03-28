@@ -40,6 +40,14 @@
                             <div class="flex-shrink-0 flex items-center">
                                 <span class="font-bold text-xl">BedTrack</span>
                             </div>
+                            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                                <a href="{{ route('dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
+                                    Dashboard
+                                </a>
+                                <a href="{{ route('chat.index') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
+                                    Chat
+                                </a>
+                            </div>
                         </div>
                         <div class="flex items-center">
                             @if(Auth::user()->is_super_admin)
@@ -72,5 +80,17 @@
             @yield('content')
         </main>
     </div>
+
+    @stack('scripts')
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
+    <script>
+        window.Echo = new Echo({
+            broadcaster: 'pusher',
+            key: '{{ config("broadcasting.connections.pusher.key") }}',
+            cluster: '{{ config("broadcasting.connections.pusher.options.cluster") }}',
+            forceTLS: true
+        });
+    </script>
 </body>
 </html>

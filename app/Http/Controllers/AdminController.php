@@ -8,9 +8,32 @@ use App\Models\Ward;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
+    /**
+     * Check if the current user is an admin
+     */
+    private function checkAdmin()
+    {
+        if (!Auth::check()) {
+            abort(403, 'User not authenticated.');
+        }
+
+        $user = Auth::user();
+        Log::info('Checking admin access for user:', [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role
+        ]);
+
+        if ($user->role !== 'admin') {
+            abort(403, 'Unauthorized action. Admin access required.');
+        }
+    }
+
     /**
      * Show the admin dashboard with all wards summary.
      *
@@ -18,10 +41,7 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        // Check if user is admin
-        if (!Auth::user()->is_admin) {
-            return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
-        }
+        $this->checkAdmin();
 
         // Get all wards with their rooms and beds
         $wards = Ward::with(['rooms.beds' => function ($query) {

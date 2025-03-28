@@ -15,20 +15,6 @@
                 <h1 class="text-3xl font-bold text-gray-800">{{ $ward->ward_name }} Dashboard</h1>
                 <p class="text-sm text-gray-500">Last updated: {{ $currentDateTime }}</p>
             </div>
-            <div class="flex space-x-2">
-                @if($ward->ward_name === 'Nursery')
-                    <a href="{{ route('room-management.add-nursery-cribs', $ward) }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
-                        Add Cribs
-                    </a>
-                @else
-                    <a href="{{ route('room-management.add-room-beds', $ward) }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
-                        Add Room & Beds
-                    </a>
-                @endif
-                <a href="{{ route('select.ward') }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
-                    Change Ward
-                </a>
-            </div>
         </div>
 
         <!-- Main Dashboard Content with Activity Timeline -->
@@ -201,11 +187,11 @@
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-3 border-b border-gray-200 bg-purple-50">
+                <div class="p-3 border-b border-gray-200 bg-blue-50">
                     <h3 class="text-sm font-medium text-gray-900">Discharges</h3>
                 </div>
                 <div class="p-3 flex items-center">
-                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
@@ -235,7 +221,7 @@
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-3 border-b border-gray-200 bg-orange-50">
+                <div class="p-3 border-b border-gray-200 bg-purple-50">
                     <h3 class="text-sm font-medium text-gray-900">Transfer In</h3>
                 </div>
                 <div class="p-3 flex items-center">

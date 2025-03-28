@@ -9,6 +9,8 @@ use App\Http\Controllers\NurseryWardController;
 use App\Http\Controllers\RoomBedManagementController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 
@@ -38,13 +40,13 @@ Route::middleware(['auth', 'ward.selection'])->group(function () {
     Route::put('/beds/{bed}/patient', [BedController::class, 'updatePatient'])->name('beds.update-patient');
 });
 
-// Admin Routes
-Route::middleware(['auth', 'admin'])->group(function () {
+// Admin Routes (no ward selection required)
+Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
 
-// Super Admin Routes
-Route::middleware(['auth', 'super.admin'])->group(function () {
+// Super Admin Routes (no ward selection required)
+Route::middleware(['auth'])->group(function () {
     Route::get('/super-admin/dashboard', [SuperAdminController::class, 'dashboard'])->name('super-admin.dashboard');
     Route::get('/super-admin/ward-management', [SuperAdminController::class, 'wardManagement'])->name('super-admin.ward-management');
     Route::post('/super-admin/ward', [SuperAdminController::class, 'addWard'])->name('super-admin.add-ward');
@@ -53,6 +55,7 @@ Route::middleware(['auth', 'super.admin'])->group(function () {
     Route::delete('/super-admin/room/{room}', [SuperAdminController::class, 'deleteRoom'])->name('super-admin.delete-room');
     Route::post('/super-admin/bed', [SuperAdminController::class, 'addBed'])->name('super-admin.add-bed');
     Route::delete('/super-admin/bed/{bed}', [SuperAdminController::class, 'deleteBed'])->name('super-admin.delete-bed');
+    Route::resource('users', UserController::class);
 });
 
 // Register Admin Middleware in App\Providers\AppServiceProvider.php boot() method with:
@@ -112,3 +115,12 @@ Route::get('/rooms/{room}/transfer-out-beds', function (App\Models\Room $room) {
 })->name('room.transfer-out-beds');
 
 Route::get('/transfers', [TransferController::class, 'index'])->name('transfers.index');
+
+// Chat Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/{chatRoom}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/messages', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('/chat/{chatRoom}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::put('/chat/{chatRoom}/name', [ChatController::class, 'updateName'])->name('chat.update.name');
+});

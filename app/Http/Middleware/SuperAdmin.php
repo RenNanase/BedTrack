@@ -5,9 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
 
-class SuperAdminMiddleware
+class SuperAdmin
 {
     /**
      * Handle an incoming request.
@@ -16,9 +15,12 @@ class SuperAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !Auth::user()->is_super_admin) {
-            return redirect()->route('dashboard')
-                ->with('error', 'You do not have super admin access.');
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Unauthorized action. Superadmin access required.');
         }
 
         return $next($request);

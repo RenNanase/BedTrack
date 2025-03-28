@@ -23,18 +23,26 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'name' => 'required|string',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Check if the user is an admin
             $user = Auth::user();
 
-            // If ward_id is provided, store it in session and update the relationship
+            // If ward_id is provided, validate access and store it
             if ($request->has('ward_id') && $request->ward_id) {
+                // Check if user has access to the selected ward
+                if (!in_array($user->role, ['superadmin', 'admin']) &&
+                    !$user->wards()->where('ward_id', $request->ward_id)->exists()) {
+                    Auth::logout();
+                    return back()->withErrors([
+                        'ward_id' => 'You do not have access to this ward.',
+                    ])->withInput($request->except('password'));
+                }
+
                 // Store the selected ward in session
                 $request->session()->put('selected_ward_id', $request->ward_id);
 
@@ -43,18 +51,19 @@ class AuthController extends Controller
 
                 return redirect()->route('dashboard');
             }
-            // If user is admin and no ward is selected, redirect to admin dashboard
-            elseif ($user->is_admin) {
-                return redirect()->route('admin.dashboard');
+            // If user is admin or superadmin, redirect to their dashboard
+            elseif (in_array($user->role, ['admin', 'superadmin'])) {
+                $route = $user->role === 'superadmin' ? 'super-admin.dashboard' : 'admin.dashboard';
+                return redirect()->route($route);
             }
-            // Otherwise, redirect to ward selection if they haven't selected a ward
+            // Otherwise, redirect to ward selection
             else {
                 return redirect()->route('select.ward');
             }
         }
 
         return back()->withErrors([
-            'name' => 'The provided credentials do not match our records.',
+            'email' => 'The provided credentials do not match our records.',
         ])->withInput($request->except('password'));
     }
 
@@ -64,10 +73,8 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return redirect()->route('login');
+        return redirect('/');
     }
 }

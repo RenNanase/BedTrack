@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class WardSelectionMiddleware
 {
@@ -16,15 +16,25 @@ class WardSelectionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip ward selection check for admin routes
-        if (Auth::user()->is_admin && $request->routeIs('admin.*')) {
+        // Skip ward selection for superadmin and admin users
+        if (Auth::check() && in_array(Auth::user()->role, ['superadmin', 'admin'])) {
             return $next($request);
         }
 
-        // Check if a ward is selected
-        if (!$request->session()->has('selected_ward_id')) {
+        // Check if user has selected a ward
+        if (!session()->has('selected_ward_id')) {
+            return redirect()->route('select.ward');
+        }
+
+        // Check if user has access to the selected ward
+        $user = Auth::user();
+        $selectedWardId = session('selected_ward_id');
+
+        if (!$user->wards()->where('ward_id', $selectedWardId)->exists()) {
+            // If user doesn't have access to the selected ward, clear the selection and redirect
+            session()->forget('selected_ward_id');
             return redirect()->route('select.ward')
-                ->with('message', 'Please select a ward to continue.');
+                ->with('error', 'You do not have access to this ward.');
         }
 
         return $next($request);

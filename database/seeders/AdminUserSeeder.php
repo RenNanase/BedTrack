@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Ward;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -16,21 +17,25 @@ class AdminUserSeeder extends Seeder
         // Create super admin user
         User::create([
             'name' => 'superadmin',
-            'password' => Hash::make('password'),
-            'is_admin' => true,
-            'is_super_admin' => true,
+            'email' => 'superadmin@example.com',
+            'password' => Hash::make('password123'),
+            'role' => 'superadmin'
         ]);
 
         // Create regular admin user
         User::create([
             'name' => 'admin',
+            'email' => 'admin@example.com',
             'password' => Hash::make('password'),
-            'is_admin' => true,
-            'is_super_admin' => false,
+            'role' => 'admin'
         ]);
 
         $this->command->info('Admin users created successfully.');
-        $this->command->info('Super Admin: username: superadmin, Password: password');
-        $this->command->info('Regular Admin: username: admin, Password: password');
+        $this->command->info('Super Admin:');
+        $this->command->info('  Email: superadmin@example.com');
+        $this->command->info('  Password: password123');
+        $this->command->info('Regular Admin:');
+        $this->command->info('  Email: admin@example.com');
+        $this->command->info('  Password: password');
     }
 }
