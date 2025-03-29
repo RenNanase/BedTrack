@@ -30,7 +30,7 @@
         }
     </script>
 </head>
-<body class="bg-secondary min-h-screen font-sans antialiased">
+<body class="bg-primary min-h-screen font-sans antialiased">
     <div class="min-h-screen flex items-center justify-center p-6">
         <div class="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
             <div class="px-8 pt-8 pb-6">
@@ -84,7 +84,7 @@
                     </div>
 
                     <div>
-                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <button type="submit" class="w-full bg-accent hover:bg-green-500/90 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
                             Sign In
                         </button>
                     </div>
