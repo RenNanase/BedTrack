@@ -51,6 +51,14 @@ class WardController extends Controller
         // Create or update the user-ward relationship
         $user->wards()->syncWithoutDetaching([$request->ward_id]);
 
+        // Get the selected ward
+        $ward = Ward::find($request->ward_id);
+
+        // If it's the nursery ward, redirect to nursery.index
+        if ($ward->ward_name === 'Nursery Ward') {
+            return redirect()->route('nursery.index');
+        }
+
         return redirect()->route('dashboard');
     }
 

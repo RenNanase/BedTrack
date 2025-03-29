@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function() {
 // Protected Routes
 Route::middleware(['auth', 'ward.selection'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/nursery', [NurseryWardController::class, 'index'])->name('nursery.index');
 
     // Bed Management Routes
     Route::get('/beds/{bed}', [BedController::class, 'show'])->name('beds.show');
@@ -62,8 +63,6 @@ Route::middleware(['auth'])->group(function () {
 // Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
 
 Route::get('/activity-logs/load-more', [App\Http\Controllers\ActivityLogController::class, 'loadMore'])->name('activity-logs.load-more');
-
-Route::get('/nursery', [NurseryWardController::class, 'index'])->name('nursery.index');
 
 // Room and Bed Management Routes
 Route::get('/ward/{ward}/add-nursery-cribs', [RoomBedManagementController::class, 'addNurseryCribs'])->name('room-management.add-nursery-cribs');

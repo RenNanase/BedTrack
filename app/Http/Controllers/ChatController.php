@@ -11,6 +11,11 @@ use App\Events\NewChatMessage;
 
 class ChatController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -26,15 +31,38 @@ class ChatController extends Controller
 
     public function show(ChatRoom $chatRoom)
     {
-        // Check if user has access to this chat
-        if (!$chatRoom->users->contains(Auth::id())) {
-            abort(403, 'You do not have access to this chat.');
-        }
+        // For global chat, allow all authenticated users
+        if ($chatRoom->type === 'global') {
+            $messages = $chatRoom->messages()
+                ->with('user')
+                ->orderBy('created_at', 'asc')
+                ->get();
 
-        $messages = $chatRoom->messages()
-            ->with('user')
-            ->orderBy('created_at', 'asc')
-            ->get();
+            // Mark messages as read
+            $unreadMessages = $chatRoom->messages()
+                ->where('user_id', '!=', Auth::id())
+                ->whereDoesntHave('reads', function($query) {
+                    $query->where('user_id', Auth::id());
+                })
+                ->get();
+
+            foreach ($unreadMessages as $message) {
+                $message->reads()->create([
+                    'user_id' => Auth::id(),
+                    'read_at' => now()
+                ]);
+            }
+        } else {
+            // Check if user has access to this chat
+            if (!$chatRoom->users->contains(Auth::id())) {
+                abort(403, 'You do not have access to this chat.');
+            }
+
+            $messages = $chatRoom->messages()
+                ->with('user')
+                ->orderBy('created_at', 'asc')
+                ->get();
+        }
 
         return view('chat.show', compact('chatRoom', 'messages'));
     }

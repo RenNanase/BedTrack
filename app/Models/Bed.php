@@ -14,6 +14,7 @@ class Bed extends Model
         'bed_number',
         'room_id',
         'status',
+        'is_crib',
         'patient_name',
         'patient_category',
         'gender',
@@ -29,6 +30,7 @@ class Bed extends Model
         'status_changed_at' => 'datetime',
         'housekeeping_started_at' => 'datetime',
         'has_hazard' => 'boolean',
+        'is_crib' => 'boolean',
     ];
 
     /**

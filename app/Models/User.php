@@ -25,7 +25,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'ward_id',
         'role',
     ];
 
@@ -58,11 +57,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the wards that belong to the user.
+     * Get the wards assigned to the user.
      */
     public function wards(): BelongsToMany
     {
-        return $this->belongsToMany(Ward::class, 'user_wards');
+        return $this->belongsToMany(Ward::class, 'user_wards')
+                    ->withTimestamps();
     }
 
     /**

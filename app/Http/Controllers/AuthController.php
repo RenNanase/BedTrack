@@ -49,6 +49,14 @@ class AuthController extends Controller
                 // Create or update the user-ward relationship
                 $user->wards()->syncWithoutDetaching([$request->ward_id]);
 
+                // Get the selected ward
+                $ward = Ward::find($request->ward_id);
+
+                // If it's the nursery ward, redirect to nursery.index
+                if ($ward->ward_name === 'Nursery Ward') {
+                    return redirect()->route('nursery.index');
+                }
+
                 return redirect()->route('dashboard');
             }
             // If user is admin or superadmin, redirect to their dashboard
@@ -64,7 +72,7 @@ class AuthController extends Controller
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
-        ])->withInput($request->except('password'));
+        ])->onlyInput('email');
     }
 
     /**

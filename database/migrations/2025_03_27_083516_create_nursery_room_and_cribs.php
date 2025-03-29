@@ -31,6 +31,7 @@ return new class extends Migration
                     'bed_number' => 'Crib ' . $i,
                     'room_id' => $room->id,
                     'status' => 'Available',
+                    'is_crib' => true,
                 ]);
             }
         }

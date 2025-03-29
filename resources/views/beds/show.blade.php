@@ -254,7 +254,7 @@
                             <!-- Hazard Toggle Section -->
                             <div class="mb-4 border rounded-lg p-4 bg-gray-50">
                                 <div class="flex items-center mb-2">
-                                    <span class="text-red-600 mr-2">💀</span>
+                                    <span class="text-red-600 mr-2">☠️</span>
                                     <label for="has_hazard" class="text-sm font-semibold text-gray-700">Bed Hazard Warning</label>
                                 </div>
 

@@ -15,7 +15,6 @@ class WardSeeder extends Seeder
     {
         Ward::create([
             'ward_name' => 'Maternity Ward',
-            
         ]);
 
         Ward::create([
@@ -25,7 +24,8 @@ class WardSeeder extends Seeder
         Ward::create([
             'ward_name' => 'Multidisciplinary Ward',
         ]);
-                Ward::create([
+
+        Ward::create([
             'ward_name' => 'Nursery Ward',
         ]);
 

@@ -1,67 +1,100 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Login - {{ config('app.name', 'BedTrack') }}</title>
 
-@section('content')
-<div class="min-h-screen flex items-center justify-center bg-primary p-6">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
-        <div class="px-8 pt-8 pb-6">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">BedTrack</h2>
-            <p class="text-center text-gray-500 mb-8">Bed Management System</p>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-            @if ($errors->any())
-                <div class="mb-4 p-4 rounded bg-red-50 border border-red-200">
-                    <ul class="list-disc pl-5 text-red-600">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-
-                <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input id="password" type="password" name="password" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-
-                <div class="mb-6">
-                    <label for="ward_id" class="block text-sm font-medium text-gray-700 mb-2">Select Ward <span class="text-xs text-gray-500">(Optional for admin)</span></label>
-                    <select id="ward_id" name="ward_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        <option value="">Select a ward...</option>
-                        @foreach($wards as $ward)
-                            <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
-                        @endforeach
-                    </select>
-                    <p class="mt-1 text-xs text-gray-500">Admin users can access all wards from the admin dashboard.</p>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00827F',
+                        secondary: '#F5F5F5',
+                        accent: '#FF9800',
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-secondary min-h-screen font-sans antialiased">
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
+            <div class="px-8 pt-8 pb-6">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">BedTrack</h1>
+                    <p class="text-gray-500 mt-2">Please sign in to your account</p>
                 </div>
 
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <input id="remember_me" type="checkbox" name="remember" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-                        <label for="remember_me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                @if ($errors->any())
+                    <div class="mb-4 p-4 rounded bg-red-50 border border-red-200">
+                        <ul class="list-disc pl-5 text-red-600">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
-                </div>
+                @endif
 
-                <div>
-                    <button type="submit" class="w-full bg-accent hover:bg-accent/90 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition-colors">
-                        Sign In
-                    </button>
-                </div>
-            </form>
-        </div>
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
 
-        <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex justify-center">
-            <p class="text-xs text-gray-500">© {{ date('Y') }} BedTrack. All rights reserved.</p>
+                    <div class="mb-6">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="password" name="password" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="ward_id" class="block text-sm font-medium text-gray-700 mb-2">Select Ward <span class="text-xs text-gray-500">(Optional for admin)</span></label>
+                        <select id="ward_id" name="ward_id"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Select a ward...</option>
+                            @foreach($wards as $ward)
+                                <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">Admin users can access all wards from the admin dashboard.</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="remember" class="rounded border-gray-300 text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex justify-center">
+                <p class="text-xs text-gray-500">© {{ date('Y') }} BedTrack. All rights reserved.</p>
+            </div>
         </div>
     </div>
-</div>
-@endsection
+</body>
+</html>

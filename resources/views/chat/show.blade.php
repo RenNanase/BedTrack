@@ -15,15 +15,26 @@
         </div>
 
         <!-- Chat Messages -->
-        <div id="chat-messages" class="h-[500px] overflow-y-auto p-4 space-y-4">
+        <div id="chat-messages" class="h-[500px] overflow-y-auto p-4">
             @foreach($messages as $message)
-                <div class="flex {{ $message->user_id === Auth::id() ? 'justify-end' : 'justify-start' }}">
-                    <div class="max-w-[70%] {{ $message->user_id === Auth::id() ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800' }} rounded-lg px-4 py-2">
-                        <div class="text-sm font-semibold mb-1">
-                            {{ $message->user->name }}
+                <div class="message-container border-b border-gray-100 py-3 last:border-0">
+                    <div class="flex items-start space-x-3">
+                        <!-- User Avatar/Initials -->
+                        <div class="w-8 h-8 rounded-full {{ $message->user_id === Auth::id() ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600' }} flex items-center justify-center font-semibold">
+                            {{ substr($message->user->name, 0, 1) }}
                         </div>
-                        <div class="text-sm">
-                            {{ $message->message }}
+
+                        <div class="flex-1">
+                            <!-- User Info and Timestamp -->
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-semibold text-gray-900">{{ $message->user->name }}</span>
+                                <span class="text-xs text-gray-500">{{ $message->created_at->setTimezone('Asia/Singapore')->format('h:i A') }}</span>
+                            </div>
+
+                            <!-- Message Content -->
+                            <div class="{{ $message->user_id === Auth::id() ? 'bg-blue-50' : 'bg-gray-50' }} rounded-lg px-4 py-2">
+                                {{ $message->message }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -36,10 +47,10 @@
                 <input type="hidden" name="chat_room_id" value="{{ $chatRoom->id }}">
                 <input type="text"
                        name="message"
-                       class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                        placeholder="Type your message...">
                 <button type="submit"
-                        class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     Send
                 </button>
             </form>
@@ -84,14 +95,26 @@
             messageInput.value = '';
             // Add the message to the chat immediately
             const chatMessages = document.getElementById('chat-messages');
+            const currentTime = new Date().toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true,
+                timeZone: 'Asia/Singapore'
+            });
             const messageHtml = `
-                <div class="flex justify-end">
-                    <div class="max-w-[70%] bg-blue-500 text-white rounded-lg px-4 py-2">
-                        <div class="text-sm font-semibold mb-1">
-                            ${data.user.name}
+                <div class="message-container border-b border-gray-100 py-3 last:border-0">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold">
+                            ${data.user.name.charAt(0)}
                         </div>
-                        <div class="text-sm">
-                            ${data.message}
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-semibold text-gray-900">${data.user.name}</span>
+                                <span class="text-xs text-gray-500">${currentTime}</span>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg px-4 py-2">
+                                ${data.message}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -110,14 +133,26 @@
 
             // Only add the message if it's from another user
             if (message.user_id !== {{ Auth::id() }}) {
+                const currentTime = new Date().toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true,
+                    timeZone: 'Asia/Singapore'
+                });
                 const messageHtml = `
-                    <div class="flex justify-start">
-                        <div class="max-w-[70%] bg-gray-200 text-gray-800 rounded-lg px-4 py-2">
-                            <div class="text-sm font-semibold mb-1">
-                                ${message.user.name}
+                    <div class="message-container border-b border-gray-100 py-3 last:border-0">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-semibold">
+                                ${message.user.name.charAt(0)}
                             </div>
-                            <div class="text-sm">
-                                ${message.message}
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-semibold text-gray-900">${message.user.name}</span>
+                                    <span class="text-xs text-gray-500">${currentTime}</span>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg px-4 py-2">
+                                    ${message.message}
+                                </div>
                             </div>
                         </div>
                     </div>

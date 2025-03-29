@@ -32,6 +32,11 @@ class DashboardController extends Controller
             $query->orderBy('bed_number');
         }])->findOrFail($selectedWardId);
 
+        // If it's the nursery ward, redirect to nursery.index
+        if ($ward->ward_name === 'Nursery Ward') {
+            return redirect()->route('nursery.index');
+        }
+
         // Count total beds in the ward
         $totalBeds = Bed::whereHas('room', function ($query) use ($selectedWardId) {
             $query->where('ward_id', $selectedWardId);

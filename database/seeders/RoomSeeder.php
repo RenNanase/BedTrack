@@ -87,18 +87,12 @@ class RoomSeeder extends Seeder
         ]);
 
         // Nursery Ward Rooms
-        $nurseryWard = Ward::where('ward_name', 'Nursery Ward')->first();
+        // $nurseryWard = Ward::where('ward_name', 'Nursery Ward')->first();
 
-        Room::create([
-            'room_name' => 'Room 501',
-            'ward_id' => $nurseryWard->id,
-            'capacity' => 4,
-        ]);
-
-        Room::create([
-            'room_name' => 'Room 502',
-            'ward_id' => $nurseryWard->id,
-            'capacity' => 4,
-        ]);
+        // Room::create([
+        //     'room_name' => 'Room 501',
+        //     'ward_id' => $nurseryWard->id,
+        //     'capacity' => 15,
+        // ]);
     }
 }
