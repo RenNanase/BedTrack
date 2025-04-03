@@ -122,4 +122,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/chat/messages', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/chat/{chatRoom}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
     Route::put('/chat/{chatRoom}/name', [ChatController::class, 'updateName'])->name('chat.update.name');
+    Route::post('/chat/typing', [ChatController::class, 'typing'])->name('chat.typing');
 });

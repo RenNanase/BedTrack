@@ -33,6 +33,11 @@ class ChatController extends Controller
     {
         // For global chat, allow all authenticated users
         if ($chatRoom->type === 'global') {
+            // Automatically attach the user to the global chat if not already attached
+            if (!$chatRoom->users->contains(Auth::id())) {
+                $chatRoom->users()->attach(Auth::id());
+            }
+
             $messages = $chatRoom->messages()
                 ->with('user')
                 ->orderBy('created_at', 'asc')
@@ -69,6 +74,8 @@ class ChatController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('Received chat message request:', $request->all());
+        
         $request->validate([
             'message' => 'required|string',
             'chat_room_id' => 'required|exists:chat_rooms,id'
@@ -76,8 +83,12 @@ class ChatController extends Controller
 
         $chatRoom = ChatRoom::findOrFail($request->chat_room_id);
 
-        // Check if user has access to this chat
-        if (!$chatRoom->users->contains(Auth::id())) {
+        // For global chat, automatically attach the user if not already attached
+        if ($chatRoom->type === 'global' && !$chatRoom->users->contains(Auth::id())) {
+            $chatRoom->users()->attach(Auth::id());
+        }
+        // For other chats, check if user has access
+        else if (!$chatRoom->users->contains(Auth::id())) {
             abort(403, 'You do not have access to this chat.');
         }
 
@@ -87,9 +98,27 @@ class ChatController extends Controller
             'type' => 'text'
         ]);
 
-        broadcast(new NewChatMessage($message))->toOthers();
+        // Load the user relationship for the broadcast
+        $message->load('user');
 
-        return response()->json($message->load('user'));
+        try {
+            \Log::info('Broadcasting message to channel chat.' . $chatRoom->id, [
+                'message_id' => $message->id,
+                'user_id' => $message->user_id,
+                'content' => $message->message,
+            ]);
+            
+            broadcast(new NewChatMessage($message))->toOthers();
+            
+            \Log::info('Message broadcasted successfully');
+        } catch (\Exception $e) {
+            \Log::error('Error broadcasting message: ' . $e->getMessage(), [
+                'exception' => $e,
+                'message_id' => $message->id
+            ]);
+        }
+
+        return response()->json($message);
     }
 
     public function getMessages(ChatRoom $chatRoom)
@@ -123,5 +152,30 @@ class ChatController extends Controller
         ]);
 
         return response()->json(['success' => true, 'name' => $chatRoom->name]);
+    }
+
+    public function typing(Request $request)
+    {
+        $request->validate([
+            'chat_room_id' => 'required|exists:chat_rooms,id',
+            'is_typing' => 'required|boolean'
+        ]);
+
+        $user = Auth::user();
+        $chatRoom = ChatRoom::findOrFail($request->chat_room_id);
+
+        // Check if user has access to this chat
+        if (!$chatRoom->users->contains($user->id)) {
+            abort(403, 'You do not have access to this chat.');
+        }
+
+        broadcast(new \App\Events\ChatTyping(
+            $user->id,
+            $user->name,
+            $request->chat_room_id,
+            $request->is_typing
+        ))->toOthers();
+
+        return response()->json(['success' => true]);
     }
 }

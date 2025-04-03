@@ -1,11 +1,91 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@layer base {
+    html {
+        font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+            'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+}
 
-@theme {
-    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/* Custom styles */
+.bg-primary {
+    background-color: #00827F;
+}
+
+.bg-secondary {
+    background-color: #F5F5F5;
+}
+
+.text-primary {
+    color: #00827F;
+}
+
+.bg-accent {
+    background-color: #FF9800;
+}
+
+.hover\:bg-blue-600:hover {
+    background-color: #2563EB;
+}
+
+.focus\:ring-blue-500:focus {
+    --tw-ring-color: #3B82F6;
+}
+
+.focus\:ring-orange-500:focus {
+    --tw-ring-color: #F97316;
+}
+
+.text-white {
+    color: white;
+}
+
+.bg-white\/20 {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.bg-white\/10:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.bg-orange-500 {
+    background-color: #F97316;
+}
+
+.bg-blue-50 {
+    background-color: #EFF6FF;
+}
+
+.bg-gray-50 {
+    background-color: #F9FAFB;
+}
+
+.bg-blue-100 {
+    background-color: #DBEAFE;
+}
+
+.bg-gray-100 {
+    background-color: #F3F4F6;
+}
+
+.text-blue-600 {
+    color: #2563EB;
+}
+
+.text-gray-600 {
+    color: #4B5563;
+}
+
+.text-gray-900 {
+    color: #111827;
+}
+
+.text-gray-500 {
+    color: #6B7280;
+}
+
+.bg-red-500 {
+    background-color: #EF4444;
 }

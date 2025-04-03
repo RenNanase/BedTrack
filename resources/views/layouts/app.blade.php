@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CDN for rapid development (remove in production) -->
+    <!-- Tailwind CDN as fallback -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -29,6 +29,95 @@
             }
         }
     </script>
+    
+    <!-- Pusher -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
+    <!-- Ensure Echo is properly loaded before other scripts -->
+    <script>
+        window.isEchoInitialized = false;
+        const APP_KEY = '{{ env('PUSHER_APP_KEY') }}';
+        const APP_CLUSTER = '{{ env('PUSHER_APP_CLUSTER') }}';
+        
+        function initEcho() {
+            if (window.isEchoInitialized) return;
+            
+            try {
+                console.log('Initializing Echo directly with key:', APP_KEY, 'cluster:', APP_CLUSTER);
+                
+                window.Echo = new (function() {
+                    const pusher = new Pusher(APP_KEY, {
+                        cluster: APP_CLUSTER,
+                        forceTLS: true,
+                        authEndpoint: '/broadcasting/auth',
+                        auth: {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        }
+                    });
+                    
+                    this.private = function(channel) {
+                        console.log('Subscribing to private channel:', channel);
+                        const listeners = {};
+                        const pusherChannel = pusher.subscribe('private-' + channel);
+                        
+                        // Add connection event listeners for debugging
+                        pusherChannel.bind('pusher:subscription_succeeded', () => {
+                            console.log('Successfully subscribed to private-' + channel);
+                        });
+                        
+                        pusherChannel.bind('pusher:subscription_error', (error) => {
+                            console.error('Failed to subscribe to private-' + channel, error);
+                        });
+                        
+                        return {
+                            listen: function(event, callback) {
+                                // Handle Laravel Echo event name format (.event-name)
+                                const eventName = event.startsWith('.') ? event.substring(1) : event;
+                                console.log('Listening for event on channel', channel + ':', eventName);
+                                pusherChannel.bind(eventName, callback);
+                                listeners[event] = callback;
+                                return this;
+                            }
+                        };
+                    };
+                })();
+                
+                window.isEchoInitialized = true;
+                console.log('Echo initialized directly');
+            } catch (error) {
+                console.error('Failed to initialize Echo:', error);
+            }
+        }
+        
+        // Initialize immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            // Double check if Echo is still not initialized by Vite
+            if (!window.Echo) {
+                initEcho();
+            } else {
+                console.log('Echo already initialized by something else');
+            }
+        });
+        
+        // Fallback to init after a short delay if not yet initialized
+        setTimeout(function() {
+            if (!window.Echo && !window.isEchoInitialized) {
+                console.log('Echo still not initialized, trying fallback initialization');
+                initEcho();
+            }
+        }, 1000);
+    </script>
+    
+    <!-- Styles and Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Direct script includes as fallback -->
+    @if(app()->environment('production'))
+    <script src="{{ asset('build/assets/app2.js') }}" defer></script>
+    <link href="{{ asset('build/assets/app.css') }}" rel="stylesheet">
+    @endif
 </head>
 <body class="bg-secondary min-h-screen font-sans antialiased">
     <div id="app">
@@ -113,15 +202,5 @@
     </div>
 
     @stack('scripts')
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script>
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: '{{ config("broadcasting.connections.pusher.key") }}',
-            cluster: '{{ config("broadcasting.connections.pusher.options.cluster") }}',
-            forceTLS: true
-        });
-    </script>
 </body>
 </html>
