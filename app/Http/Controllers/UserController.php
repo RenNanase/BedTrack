@@ -25,7 +25,6 @@ class UserController extends Controller
         Log::info('Checking superadmin access for user:', [
             'id' => $user->id,
             'name' => $user->name,
-            'email' => $user->email,
             'role' => $user->role
         ]);
 
@@ -37,11 +36,29 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->checkSuperAdmin();
-        $users = User::with('ward')->get();
+        
+        $query = User::with('wards');
+        
+        // Handle search by username if provided
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            Log::info('Searching for users with name like: ' . $searchTerm);
+            $query->where('name', 'like', '%' . $searchTerm . '%');
+        }
+        
+        // Paginate with 9 users per page
+        $users = $query->paginate(9);
         $wards = Ward::all();
+        
+        // If search returns just one user, redirect to edit page
+        if ($request->has('search') && $users->count() === 1) {
+            Log::info('Found exactly one user, redirecting to edit page for user ID: ' . $users->first()->id);
+            return redirect()->route('users.edit', $users->first());
+        }
+        
         return view('users.index', compact('users', 'wards'));
     }
 
@@ -62,24 +79,22 @@ class UserController extends Controller
     {
         $this->checkSuperAdmin();
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'ward_id' => 'required_if:role,staff|exists:wards,id',
+            'name' => 'required|string|max:255|unique:users,name',
+            'password' => 'required|string|min:6|confirmed',
+            'ward_id' => 'nullable|exists:wards,id',
             'role' => 'required|in:admin,staff,superadmin',
         ]);
 
         // Create the user
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'ward_id' => $request->role === 'staff' ? $request->ward_id : null,
+            'ward_id' => $request->ward_id,
             'role' => $request->role,
         ]);
 
-        // If user is staff, attach them to the ward
-        if ($request->role === 'staff' && $request->ward_id) {
+        // If ward_id is provided, attach the user to the ward
+        if ($request->ward_id) {
             $user->wards()->attach($request->ward_id);
         }
 
@@ -102,6 +117,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $this->checkSuperAdmin();
+        Log::info('Accessing edit user form for user ID: ' . $user->id);
+        $user->load('wards');
         $wards = Ward::all();
         return view('users.edit', compact('user', 'wards'));
     }
@@ -113,22 +130,29 @@ class UserController extends Controller
     {
         $this->checkSuperAdmin();
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'ward_id' => 'required|exists:wards,id',
+            'name' => 'required|string|max:255|unique:users,name,' . $user->id,
+            'ward_id' => 'nullable|exists:wards,id',
             'role' => 'required|in:admin,staff,superadmin',
         ]);
 
+        // Update basic user information
         $user->update([
             'name' => $request->name,
-            'email' => $request->email,
-            'ward_id' => $request->ward_id,
             'role' => $request->role,
+            'ward_id' => $request->ward_id, // Update the main ward_id as well
         ]);
 
+        // Sync ward assignment for all users
+        if ($request->ward_id) {
+            $user->wards()->sync([$request->ward_id]);
+        } else {
+            $user->wards()->detach();
+        }
+
+        // Update password if provided
         if ($request->filled('password')) {
             $request->validate([
-                'password' => 'required|string|min:8|confirmed',
+                'password' => 'required|string|min:6|confirmed',
             ]);
             $user->update(['password' => Hash::make($request->password)]);
         }

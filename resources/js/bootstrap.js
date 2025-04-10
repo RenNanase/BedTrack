@@ -18,76 +18,28 @@ window.Pusher = Pusher;
 try {
     const appKey = import.meta.env.VITE_PUSHER_APP_KEY;
     const cluster = import.meta.env.VITE_PUSHER_APP_CLUSTER;
+    const appId = import.meta.env.VITE_PUSHER_APP_ID || '1965625';
     
-    console.log('Initializing Echo with key:', appKey, 'cluster:', cluster);
+    console.log('Initializing Echo with key:', appKey, 'cluster:', cluster, 'appId:', appId);
     
     window.Echo = new Echo({
         broadcaster: 'pusher',
         key: appKey,
         cluster: cluster,
         forceTLS: true,
-        enabledTransports: ['ws', 'wss'],
-        disableStats: true,
+        wsHost: 'ws-' + cluster + '.pusher.com',
+        wsPort: 443,
+        wssPort: 443,
+        authEndpoint: window.location.origin + '/broadcasting/auth',
         csrfToken: token ? token.content : '',
-        authEndpoint: '/broadcasting/auth',
         auth: {
             headers: {
                 'X-CSRF-TOKEN': token ? token.content : '',
             },
-        },
-        // Add additional options for CORS and reliability
-        wsHost: `ws-${cluster}.pusher.com`,
-        wsPort: 443,
-        wssPort: 443,
-        httpHost: `sockjs-${cluster}.pusher.com`,
-        httpPort: 80,
-        httpsPort: 443,
-        // Disable stats to reduce requests
-        enableStats: false,
+        }
     });
     
-    // Log subscription status for debugging
-    const originalPrivate = window.Echo.private;
-    window.Echo.private = function(channel) {
-        console.log('Subscribing to private channel through Echo:', channel);
-        const subscription = originalPrivate.call(this, channel);
-        
-        // Add hook to check channel subscription status
-        const originalListen = subscription.listen;
-        subscription.listen = function(event, callback) {
-            console.log('Setting up listener for event:', event, 'on channel:', channel);
-            return originalListen.call(this, event, callback);
-        };
-        
-        return subscription;
-    };
-    
-    // Add the same for public channels if not already defined
-    if (typeof window.Echo.channel === 'function') {
-        const originalChannel = window.Echo.channel;
-        window.Echo.channel = function(channel) {
-            console.log('Subscribing to public channel through Echo:', channel);
-            const subscription = originalChannel.call(this, channel);
-            
-            // Add hook to check channel subscription status
-            const originalListen = subscription.listen;
-            subscription.listen = function(event, callback) {
-                console.log('Setting up listener for event:', event, 'on channel:', channel);
-                return originalListen.call(this, event, callback);
-            };
-            
-            return subscription;
-        };
-    } else {
-        // Add channel method if it doesn't exist
-        window.Echo.channel = function(channel) {
-            console.log('Using custom channel() implementation for:', channel);
-            // Just use private channel since it's what we have
-            return this.private(channel);
-        };
-    }
-    
     console.log('Echo initialized successfully');
-} catch (error) {
-    console.error('Failed to initialize Echo:', error);
+} catch (e) {
+    console.error('Error initializing Echo:', e);
 }

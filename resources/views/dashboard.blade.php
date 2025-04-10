@@ -15,107 +15,113 @@
                 <h1 class="text-3xl font-bold text-gray-800">{{ $ward->ward_name }} Dashboard</h1>
                 <p class="text-sm text-gray-500">Last updated: {{ $currentDateTime }}</p>
             </div>
+            <div class="flex space-x-3">
+                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'superadmin')
+                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-[#BB8858] text-white rounded-md hover:bg-[#D8A48F] transition-colors">
+                    Admin Dashboard
+                </a>
+                @endif
+            </div>
         </div>
 
         <!-- Main Dashboard Content with Activity Timeline -->
-                <div class="flex flex-col md:flex-row gap-6 mb-8">
-                    <!-- Main Dashboard Content -->
-                    <div class="w-full md:w-2/3">
-                        <!-- Activity Timeline -->
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                            <div class="p-4 border-b border-gray-200 bg-primary/5">
-                                <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
-                            </div>
-                            <div class="p-4">
-                                @if(count($activityLogs) > 0)
-                                <div class="relative" id="activity-container">
-                                    <!-- Activity logs will be loaded here -->
-                                    @include('partials.activity-logs', ['activityLogs' => $activityLogs])
+        <div class="flex flex-col md:flex-row gap-6 mb-8">
+            <!-- Main Dashboard Content -->
+            <div class="w-full md:w-2/3">
+                <!-- Activity Timeline -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 bg-primary/5">
+                        <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                    </div>
+                    <div class="p-4">
+                        @if(count($activityLogs) > 0)
+                        <div class="relative" id="activity-container">
+                            <!-- Activity logs will be loaded here -->
+                            @include('partials.activity-logs', ['activityLogs' => $activityLogs])
 
-                                    @if($hasMoreLogs)
-                                    <div class="text-center mt-6">
-                                        <button id="load-more-btn"
-                                            class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-                                            data-offset="5">
-                                            Load More
-                                        </button>
+                            @if($hasMoreLogs)
+                            <div class="text-center mt-6">
+                                <button id="load-more-btn"
+                                    class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                                    data-offset="5">
+                                    Load More
+                                </button>
+                            </div>
+                            @endif
+                        </div>
+                        @else
+                        <div class="text-center py-8 text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p>No activity logs found.</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend Section -->
+            <div class="w-full md:w-1/3 shadow-md overflow-hidden mb-8 md:top-4 md:self-start md:ml-auto">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center"
+                        onclick="toggleLegend()">
+                        <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
+                        <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
+                            viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div id="legendContent" class="p-4 hidden">
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
+                                        <span class="text-sm">Male</span>
                                     </div>
-                                    @endif
+                                    <div class="flex items-center">
+                                        <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
+                                        <span class="text-sm">Female</span>
+                                    </div>
                                 </div>
-                                @else
-                                <div class="text-center py-8 text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <p>No activity logs found.</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
+                                        <span class="text-sm">Adult</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
+                                        <span class="text-sm">Paediatric</span>
+                                    </div>
                                 </div>
-                                @endif
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Hazard</h3>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <span class="w-6 h-6 flex items-center justify-center text-red-600 mr-2">
+                                            ☠️
+                                        </span>
+                                        <span class="text-sm">Patient/Bed Hazard</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Legend Section -->
-                            <div class="w-full md:w-1/3 shadow-md overflow-hidden mb-8 md:top-4 md:self-start md:ml-auto">
-                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                                    <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center"
-                                        onclick="toggleLegend()">
-                                        <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
-                                        <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div id="legendContent" class="p-4 hidden">
-                                        <div class="space-y-4">
-                                            <div>
-                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
-                                                <div class="space-y-2">
-                                                    <div class="flex items-center">
-                                                        <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
-                                                        <span class="text-sm">Male</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
-                                                        <span class="text-sm">Female</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
-                                                <div class="space-y-2">
-                                                    <div class="flex items-center">
-                                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
-                                                        <span class="text-sm">Adult</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
-                                                        <span class="text-sm">Paediatric</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Hazard</h3>
-                                                <div class="space-y-2">
-                                                    <div class="flex items-center">
-                                                        <span class="w-6 h-6 flex items-center justify-center text-red-600 mr-2">
-                                                            ☠️
-                                                        </span>
-                                                        <span class="text-sm">Patient/Bed Hazard</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                 </div>
+            </div>
+        </div>
 
-
-                <!-- Bed Status Summary Cards -->
+        <!-- Bed Status Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="p-3 border-b border-gray-200 bg-gray-50">
@@ -230,7 +236,7 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['transfer_in'] ?? 0 }}</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['transfer_in'] }}</div>
                         <div class="text-xs text-gray-500">Transfer In</div>
                     </div>
                 </div>
@@ -429,7 +435,7 @@
                                         ($crib->status == 'Discharged' ? 'bg-blue-100 text-blue-800' :
                                         ($crib->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' :
                                         ($crib->status == 'Transfer-out' ? 'bg-orange-100 text-orange-800' :
-                                        ($crib->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
+                                        ($bed->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
                                         'bg-red-100 text-red-800'))))) }}">
                                         <div class="flex justify-between items-center">
                                             <span class="font-medium">{{ $crib->bed_number }}</span>
@@ -439,7 +445,7 @@
                                                 ($crib->status == 'Discharged' ? 'bg-blue-200 text-blue-900' :
                                                 ($crib->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' :
                                                 ($crib->status == 'Transfer-out' ? 'bg-orange-200 text-orange-900' :
-                                                ($crib->status == 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
+                                                ($bed->status == 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
                                                 'bg-red-200 text-red-900'))))) }}">
                                                 {{ $crib->status }}
                                             </span>
@@ -515,18 +521,61 @@
                 @else
                     <!-- Regular Ward Layout -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        @foreach($ward->rooms as $room)
-                        <div class="border rounded-lg overflow-hidden shadow-sm">
+                        @foreach($rooms as $room)
+                        <div class="border rounded-lg overflow-hidden shadow-sm" data-room-id="{{ $room->id }}">
                             <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                 <h3 class="font-medium text-gray-700">{{ $room->room_name }}</h3>
                                 <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
                                     Capacity: {{ $room->capacity }}
                                 </span>
+                                @if(auth()->user()->role === 'superadmin')
+                                <div class="cursor-move">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                @endif
                             </div>
+
+                            @if($room->is_blocked)
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>Room Blocked</strong> - {{ $room->block_remarks }}
+                                            <br>
+                                            <small class="text-red-600">Blocked by {{ $room->blockedByUser->name }} on {{ $room->blocked_at->format('M d, Y h:i A') }}</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
+                            @if(auth()->user()->wards->contains($room->ward_id) || auth()->user()->isAdmin)
+                            <div class="mt-4 flex justify-end space-x-2 px-4">
+                                @if(!$room->is_blocked)
+                                <button onclick="showBlockRoomModal('{{ $room->id }}')" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm">
+                                    Block Room
+                                </button>
+                                @else
+                                <form action="{{ route('rooms.unblock', $room) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm">
+                                        Unblock Room
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
+                            @endif
 
                             <div class="p-4">
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                    @foreach($room->beds as $bed)
+                                    @foreach($room->beds->sortBy('bed_number') as $bed)
                                     <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
                                         $bed->status == 'Available' ? 'border-green-300 bg-green-50' :
                                         ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' :
@@ -544,7 +593,7 @@
                                             ($bed->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
                                             'bg-red-100 text-red-800'))))) }}">
                                             <div class="flex justify-between items-center">
-                                                <span class="font-medium">{{ $bed->bed_number }}</span>
+                                                <span class="font-medium">Bed {{ $bed->bed_number }}</span>
                                                 <span class="text-xs px-1.5 py-0.5 rounded-full {{
                                                     $bed->status == 'Available' ? 'bg-green-200 text-green-900' :
                                                     ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' :
@@ -586,33 +635,6 @@
                                                         @endif
                                                     </div>
                                                 </div>
-                                                @if($bed->status_changed_at)
-                                                    <p class="text-xs text-gray-500 mt-1">
-                                                        @if($bed->status == 'Housekeeping')
-                                                            Started: {{ $bed->housekeeping_started_at->format('M d, h:i A') }}
-                                                            <br>
-                                                            <span class="text-pink-600">
-                                                                @php
-                                                                    $minutesRemaining = Carbon\Carbon::now()->diffInMinutes($bed->housekeeping_started_at->addHours(2));
-                                                                    $hoursRemaining = floor($minutesRemaining / 60);
-                                                                    $minutesLeft = $minutesRemaining % 60;
-
-                                                                    if ($minutesRemaining <= 0) {
-                                                                        $timeDisplay = 'Available soon';
-                                                                    } elseif ($hoursRemaining > 0) {
-                                                                        $timeDisplay = $hoursRemaining . ' hour' . ($hoursRemaining > 1 ? 's' : '') . ' ' . $minutesLeft . ' minute' . ($minutesLeft > 1 || $minutesLeft == 0 ? 's' : '');
-                                                                    } else {
-                                                                        $timeDisplay = $minutesLeft . ' minute' . ($minutesLeft > 1 ? 's' : '');
-                                                                    }
-                                                                @endphp
-                                                                Auto-available in {{ $timeDisplay }}
-                                                            </span>
-                                                        @else
-                                                            {{ $bed->status == 'Discharged' ? 'Discharged' : 'Since' }}:
-                                                            {{ $bed->status_changed_at->format('M d, h:i A') }}
-                                                        @endif
-                                                    </p>
-                                                @endif
                                             @else
                                                 <p class="text-sm text-gray-500 italic">
                                                     No patient
@@ -628,6 +650,46 @@
                                     @endforeach
                                 </div>
                             </div>
+
+                            @if($room->ward->ward_name === 'Maternity Ward')
+                                <div class="mt-4">
+                                    <h5 class="font-medium text-gray-700 mb-2">Bassinets</h5>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                        @foreach($room->bassinets as $bassinet)
+                                            <div class="border rounded-md p-3 {{
+                                                $bassinet->status === 'Available' ? 'bg-green-50 border-green-200' :
+                                                ($bassinet->status === 'Occupied' ? 'bg-blue-50 border-blue-200' :
+                                                ($bassinet->status === 'Transfer-out' ? 'bg-yellow-50 border-yellow-200' :
+                                                ($bassinet->status === 'Transfer-in' ? 'bg-purple-50 border-purple-200' :
+                                                'bg-gray-50 border-gray-200')))
+                                            }}">
+                                                <div class="flex justify-between items-start">
+                                                    <div>
+                                                        <h6 class="font-medium text-gray-900">Bassinet {{ $bassinet->bassinet_number }}</h6>
+                                                        <p class="text-sm text-gray-500">
+                                                            Status: <span class="font-medium">{{ $bassinet->status }}</span>
+                                                        </p>
+                                                        @if($bassinet->patient_name)
+                                                            <p class="text-sm text-gray-700 mt-1">
+                                                                Baby: {{ $bassinet->patient_name }}
+                                                                @if($bassinet->gender)
+                                                                    <span class="ml-1">({{ $bassinet->gender }})</span>
+                                                                @endif
+                                                            </p>
+                                                        @endif
+                                                    </div>
+                                                    @if($bassinet->status === 'Occupied')
+                                                        <button onclick="showTransferModal('{{ $bassinet->id }}')" 
+                                                                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+                                                            Transfer
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                         @endforeach
                     </div>
@@ -635,7 +697,65 @@
             </div>
         </div>
 
+        <!-- Block Room Modal -->
+        <div id="blockRoomModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Block Room</h3>
+                    <form id="blockRoomForm" method="POST" class="mt-4">
+                        @csrf
+                        <div class="mt-2">
+                            <label for="block_remarks" class="block text-sm font-medium text-gray-700">Reason for Blocking</label>
+                            <textarea id="block_remarks" name="block_remarks" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm" required></textarea>
+                        </div>
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button type="button" onclick="hideBlockRoomModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                                Block Room
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
+        <!-- Transfer Modal -->
+        <div id="transferModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Transfer Bassinet</h3>
+                    <form id="transferForm" class="mt-4">
+                        @csrf
+                        <div class="mt-2">
+                            <label for="destination_ward" class="block text-sm font-medium text-gray-700">Destination Ward</label>
+                            <select id="destination_ward" name="destination_ward_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                                @foreach($wards as $ward)
+                                    @if($ward->id !== $room->ward_id)
+                                        <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mt-2">
+                            <label for="destination_room" class="block text-sm font-medium text-gray-700">Destination Room</label>
+                            <select id="destination_room" name="destination_room_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                                <!-- Rooms will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button type="button" onclick="hideTransferModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                Transfer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -647,7 +767,7 @@
         if (legendContent.classList.contains('hidden')) {
             legendContent.classList.remove('hidden');
             legendToggleIcon.innerHTML = `
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
             `;
         } else {
             legendContent.classList.add('hidden');
@@ -656,6 +776,72 @@
             `;
         }
     }
+
+    function showBlockRoomModal(roomId) {
+        const modal = document.getElementById('blockRoomModal');
+        const form = document.getElementById('blockRoomForm');
+        form.action = `/BedTrack/public/rooms/${roomId}/block`;
+        modal.classList.remove('hidden');
+        // Clear any previous input
+        document.getElementById('block_remarks').value = '';
+    }
+
+    function hideBlockRoomModal() {
+        const modal = document.getElementById('blockRoomModal');
+        modal.classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('blockRoomModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideBlockRoomModal();
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('blockRoomForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const formData = new FormData(form);
+        const blockRemarks = document.getElementById('block_remarks').value.trim();
+        
+        if (!blockRemarks) {
+            alert('Please enter a reason for blocking the room.');
+            return;
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Room not found');
+                }
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Failed to block room');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.error || 'Failed to block room');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'Failed to block room. Please try again.');
+        });
+    });
 
     // Load more activity logs
     document.addEventListener('DOMContentLoaded', function() {
@@ -703,5 +889,101 @@
             });
         }
     });
+
+    @if(auth()->user()->role === 'superadmin')
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roomContainer = document.querySelector('.grid');
+            if (roomContainer) {
+                new Sortable(roomContainer, {
+                    animation: 150,
+                    handle: '.cursor-move',
+                    onEnd: function(evt) {
+                        const roomIds = Array.from(roomContainer.children).map((item, index) => ({
+                            id: item.dataset.roomId,
+                            sequence: index
+                        }));
+                        
+                        fetch('{{ route("super-admin.update-room-sequence") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ rooms: roomIds })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Show success message
+                                const successMessage = document.createElement('div');
+                                successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
+                                successMessage.textContent = 'Room order updated successfully';
+                                document.body.appendChild(successMessage);
+                                setTimeout(() => successMessage.remove(), 3000);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Show error message
+                            const errorMessage = document.createElement('div');
+                            errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
+                            errorMessage.textContent = 'Failed to update room order';
+                            document.body.appendChild(errorMessage);
+                            setTimeout(() => errorMessage.remove(), 3000);
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+    @endif
+
+    // Transfer modal functions
+    function showTransferModal(bassinetId) {
+        $('#transferModal').removeClass('hidden');
+        $('#transferForm').data('bassinet-id', bassinetId);
+    }
+
+    function hideTransferModal() {
+        $('#transferModal').addClass('hidden');
+    }
+
+    // Load rooms when ward is selected
+    $('#destination_ward').on('change', function() {
+        const wardId = $(this).val();
+        $.get(`/wards/${wardId}/rooms`, function(rooms) {
+            const roomSelect = $('#destination_room');
+            roomSelect.empty();
+            rooms.forEach(room => {
+                roomSelect.append(`<option value="${room.id}">${room.room_name}</option>`);
+            });
+        });
+    });
+
+    // Handle transfer form submission
+    $('#transferForm').on('submit', function(e) {
+        e.preventDefault();
+        const bassinetId = $(this).data('bassinet-id');
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: `/bassinets/${bassinetId}/transfer`,
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON.message || 'Failed to transfer bassinet');
+            }
+        });
+    });
 </script>
 @endsection
+

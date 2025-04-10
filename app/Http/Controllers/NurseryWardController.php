@@ -44,11 +44,11 @@ class NurseryWardController extends Controller
                 $nurseryRoom = Room::create([
                     'ward_id' => $nurseryWard->id,
                     'room_name' => 'Nursery Room',
-                    'capacity' => 20, // Default capacity
+                    'capacity' => 9, // Default capacity
                 ]);
 
                 // Create initial cribs
-                for ($i = 1; $i <= 20; $i++) {
+                for ($i = 1; $i <= 9; $i++) {
                     Bed::create([
                         'bed_number' => 'Crib ' . $i,
                         'room_id' => $nurseryRoom->id,
@@ -70,6 +70,7 @@ class NurseryWardController extends Controller
             $occupiedCribs = $cribs->where('status', 'Occupied')->count();
             $bookedCribs = $cribs->where('status', 'Booked')->count();
             $housekeepingCribs = $cribs->where('status', 'Housekeeping')->count();
+            $transferInCribs = $cribs->where('status', 'Transfer-in')->count();
 
             // Get current date and time
             $currentDateTime = Carbon::now()->format('F d, Y - h:i A');
@@ -138,6 +139,7 @@ class NurseryWardController extends Controller
                 'available_cribs' => $availableCribs,
                 'occupied_cribs' => $occupiedCribs,
                 'booked_cribs' => $bookedCribs,
+                'transfer_in_cribs' => $transferInCribs,
                 'cribs' => $cribs->toArray()
             ]);
 
@@ -148,6 +150,7 @@ class NurseryWardController extends Controller
                 'occupiedCribs',
                 'bookedCribs',
                 'housekeepingCribs',
+                'transferInCribs',
                 'currentDateTime',
                 'recentDischarges',
                 'todayDischarges',

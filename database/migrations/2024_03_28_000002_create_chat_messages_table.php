@@ -15,6 +15,8 @@ return new class extends Migration
             $table->text('message');
             $table->string('type')->default('text'); // text, image, file, etc.
             $table->string('file_url')->nullable();
+            $table->unsignedBigInteger('reply_to_id')->nullable();
+            $table->foreign('reply_to_id')->references('id')->on('chat_messages')->onDelete('set null');
             $table->timestamps();
         });
     }

@@ -16,19 +16,6 @@ class ChatController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
-    {
-        $user = Auth::user();
-
-        // Get the global chat
-        $globalChat = ChatRoom::where('type', 'global')->first();
-
-        // Get all users except the current user
-        $users = User::where('id', '!=', $user->id)->get();
-
-        return view('chat.index', compact('globalChat', 'users'));
-    }
-
     public function show(ChatRoom $chatRoom)
     {
         // For global chat, allow all authenticated users
@@ -78,7 +65,8 @@ class ChatController extends Controller
         
         $request->validate([
             'message' => 'required|string',
-            'chat_room_id' => 'required|exists:chat_rooms,id'
+            'chat_room_id' => 'required|exists:chat_rooms,id',
+            'reply_to_id' => 'nullable|exists:chat_messages,id'
         ]);
 
         $chatRoom = ChatRoom::findOrFail($request->chat_room_id);
@@ -95,20 +83,23 @@ class ChatController extends Controller
         $message = $chatRoom->messages()->create([
             'user_id' => Auth::id(),
             'message' => $request->message,
+            'reply_to_id' => $request->reply_to_id,
             'type' => 'text'
         ]);
 
-        // Load the user relationship for the broadcast
-        $message->load('user');
+        // Load the user relationship and reply information for the broadcast
+        $message->load(['user', 'replyTo.user']);
 
         try {
             \Log::info('Broadcasting message to channel chat.' . $chatRoom->id, [
                 'message_id' => $message->id,
                 'user_id' => $message->user_id,
                 'content' => $message->message,
+                'reply_to_id' => $message->reply_to_id,
             ]);
             
-            broadcast(new NewChatMessage($message))->toOthers();
+            // Use event helper instead of broadcast to ensure it goes through the event system properly
+            event(new NewChatMessage($message));
             
             \Log::info('Message broadcasted successfully');
         } catch (\Exception $e) {
@@ -118,7 +109,14 @@ class ChatController extends Controller
             ]);
         }
 
-        return response()->json($message);
+        return response()->json([
+            'message' => $message->message,
+            'user' => $message->user,
+            'created_at' => $message->created_at,
+            'reply_to_id' => $message->reply_to_id,
+            'reply_to_user' => $message->replyTo ? $message->replyTo->user : null,
+            'reply_to_message' => $message->replyTo ? $message->replyTo->message : null
+        ]);
     }
 
     public function getMessages(ChatRoom $chatRoom)
@@ -169,12 +167,27 @@ class ChatController extends Controller
             abort(403, 'You do not have access to this chat.');
         }
 
-        broadcast(new \App\Events\ChatTyping(
-            $user->id,
-            $user->name,
-            $request->chat_room_id,
-            $request->is_typing
-        ))->toOthers();
+        try {
+            \Log::info('Broadcasting typing status', [
+                'user_id' => $user->id,
+                'username' => $user->name,
+                'chat_room_id' => $request->chat_room_id,
+                'is_typing' => $request->is_typing
+            ]);
+            
+            event(new \App\Events\ChatTyping(
+                $user->id,
+                $user->name,
+                $request->chat_room_id,
+                $request->is_typing
+            ));
+            
+            \Log::info('Typing status broadcast dispatched successfully');
+        } catch (\Exception $e) {
+            \Log::error('Error broadcasting typing status: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }

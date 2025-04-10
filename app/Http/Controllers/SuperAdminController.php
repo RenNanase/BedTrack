@@ -116,15 +116,23 @@ class SuperAdminController extends Controller
 
         $request->validate([
             'ward_id' => 'required|exists:wards,id',
-            'room_number' => 'required|string|max:255',
+            'room_name' => 'required|string|max:255',
             'room_type' => 'required|in:regular,nursery',
         ]);
 
-        Room::create([
+        $roomData = [
             'ward_id' => $request->ward_id,
-            'room_number' => $request->room_number,
+            'room_name' => $request->room_name,
             'room_type' => $request->room_type,
-        ]);
+            'capacity' => 0, // Default capacity
+        ];
+
+        // For backward compatibility
+        if ($request->has('room_number')) {
+            $roomData['room_number'] = $request->room_number;
+        }
+
+        Room::create($roomData);
 
         return redirect()->route('super-admin.ward-management')
             ->with('success', 'Room added successfully.');

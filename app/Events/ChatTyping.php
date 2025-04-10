@@ -41,15 +41,15 @@ class ChatTyping implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        $channel = 'chat.' . $this->chatRoomId;
-        \Log::info('Broadcasting typing event on channel: ' . $channel, [
+        $channel = new Channel('chat.' . $this->chatRoomId);
+        \Log::info('Broadcasting typing event on channel: ' . $channel->name, [
             'user_id' => $this->userId,
             'username' => $this->username,
             'is_typing' => $this->isTyping
         ]);
         
         return [
-            new Channel($channel),
+            $channel,
         ];
     }
 

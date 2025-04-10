@@ -17,25 +17,24 @@ class AdminUserSeeder extends Seeder
         // Create super admin user
         User::create([
             'name' => 'superadmin',
-            'email' => 'superadmin@example.com',
-            'password' => Hash::make('password123'),
-            'role' => 'superadmin'
+            'password' => Hash::make('superadmin'),
+            'role' => 'superadmin',
         ]);
 
         // Create regular admin user
         User::create([
             'name' => 'admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin'
+            'password' => Hash::make('admin'),
+            'role' => 'admin',
         ]);
 
-        $this->command->info('Admin users created successfully.');
+        $this->command->info('Admin users created:');
         $this->command->info('Super Admin:');
-        $this->command->info('  Email: superadmin@example.com');
-        $this->command->info('  Password: password123');
-        $this->command->info('Regular Admin:');
-        $this->command->info('  Email: admin@example.com');
-        $this->command->info('  Password: password');
+        $this->command->info('  Username: superadmin');
+        $this->command->info('  Password: superadmin');
+        $this->command->line('');
+        $this->command->info('Admin:');
+        $this->command->info('  Username: admin');
+        $this->command->info('  Password: admin');
     }
 }

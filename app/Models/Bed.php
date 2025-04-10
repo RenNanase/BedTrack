@@ -24,6 +24,7 @@ class Bed extends Model
         'housekeeping_started_at',
         'has_hazard',
         'hazard_notes',
+        'bed_type',
     ];
 
     protected $casts = [

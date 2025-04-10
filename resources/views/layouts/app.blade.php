@@ -33,6 +33,109 @@
     <!-- Pusher -->
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
+    <!-- Pusher Test Script - Only for development/debugging -->
+    @if(config('app.debug'))
+    <script>
+        // Create a small utility to test Pusher connection
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only run this test script if we're not already on the chat page
+            if (!window.pusher && !document.getElementById('debug-status')) {
+                console.log('Running Pusher diagnostic test...');
+                
+                // Create a debug element
+                const debugEl = document.createElement('div');
+                debugEl.style.position = 'fixed';
+                debugEl.style.bottom = '5px';
+                debugEl.style.left = '5px';
+                debugEl.style.padding = '10px';
+                debugEl.style.background = 'rgba(0,0,0,0.7)';
+                debugEl.style.color = 'white';
+                debugEl.style.fontSize = '12px';
+                debugEl.style.zIndex = '9999';
+                debugEl.style.maxWidth = '400px';
+                debugEl.style.maxHeight = '200px';
+                debugEl.style.overflow = 'auto';
+                debugEl.style.borderRadius = '4px';
+                document.body.appendChild(debugEl);
+                
+                function log(message) {
+                    console.log(message);
+                    debugEl.innerHTML += message + '<br>';
+                    debugEl.scrollTop = debugEl.scrollHeight;
+                }
+                
+                // Test Pusher connection
+                try {
+                    log('Initializing Pusher test...');
+                    const testPusher = new Pusher('{{ env('PUSHER_APP_KEY') }}', {
+                        cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+                        forceTLS: true,
+                        wsHost: '{{ env('PUSHER_HOST', 'ws-'.env('PUSHER_APP_CLUSTER').'.pusher.com') }}',
+                        wsPort: {{ env('PUSHER_PORT', 443) }},
+                        wssPort: {{ env('PUSHER_PORT', 443) }},
+                        authEndpoint: '{{ url('/broadcasting/auth') }}',
+                        auth: {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        },
+                        enableLogging: true
+                    });
+                    
+                    testPusher.connection.bind('connecting', () => {
+                        log('Connecting to Pusher...');
+                    });
+                    
+                    testPusher.connection.bind('connected', () => {
+                        log('Successfully connected to Pusher!');
+                        
+                        // Try to subscribe to a test channel
+                        const testChannel = testPusher.subscribe('test-channel');
+                        
+                        testChannel.bind('pusher:subscription_succeeded', () => {
+                            log('Successfully subscribed to test channel');
+                        });
+                        
+                        testChannel.bind('test-event', (data) => {
+                            log('Received test event: ' + JSON.stringify(data));
+                        });
+                        
+                        log('Listening for events on test-channel...');
+                    });
+                    
+                    testPusher.connection.bind('disconnected', () => {
+                        log('Disconnected from Pusher');
+                    });
+                    
+                    testPusher.connection.bind('error', (err) => {
+                        log('Connection error: ' + JSON.stringify(err));
+                    });
+                    
+                    // Add a close button
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = 'Close';
+                    closeBtn.style.marginTop = '10px';
+                    closeBtn.style.padding = '3px 8px';
+                    closeBtn.style.borderRadius = '3px';
+                    closeBtn.style.background = '#f44336';
+                    closeBtn.style.color = 'white';
+                    closeBtn.style.border = 'none';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.onclick = function() {
+                        testPusher.disconnect();
+                        debugEl.remove();
+                    };
+                    debugEl.appendChild(document.createElement('br'));
+                    debugEl.appendChild(closeBtn);
+                    
+                } catch (error) {
+                    log('Error initializing Pusher: ' + error.message);
+                }
+            }
+        });
+    </script>
+    @endif
+    
     <!-- Ensure Echo is properly loaded before other scripts -->
     <script>
         window.isEchoInitialized = false;
@@ -49,7 +152,10 @@
                     const pusher = new Pusher(APP_KEY, {
                         cluster: APP_CLUSTER,
                         forceTLS: true,
-                        authEndpoint: '/broadcasting/auth',
+                        wsHost: '{{ env('PUSHER_HOST', 'ws-'.env('PUSHER_APP_CLUSTER').'.pusher.com') }}',
+                        wsPort: {{ env('PUSHER_PORT', 443) }},
+                        wssPort: {{ env('PUSHER_PORT', 443) }},
+                        authEndpoint: '{{ url('/broadcasting/auth') }}',
                         auth: {
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -170,11 +276,14 @@
                             </div>
                         </div>
                         <div class="flex items-center">
-                            @if(Auth::user()->is_super_admin)
+                            @if(Auth::user()->role === 'superadmin')
                             <a href="{{ route('super-admin.dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
                                 Super Admin Dashboard
                             </a>
-                            @elseif(Auth::user()->is_admin)
+                            <a href="{{ route('users.index') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
+                                User Management
+                            </a>
+                            @elseif(Auth::user()->role === 'admin')
                             <a href="{{ route('admin.dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
                                 Admin Dashboard
                             </a>

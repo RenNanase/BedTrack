@@ -11,8 +11,11 @@ use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\BassinetController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
+use Pusher\Pusher;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -39,10 +42,14 @@ Route::middleware(['auth', 'ward.selection'])->group(function () {
     Route::put('/beds/{bed}/status', [BedController::class, 'updateStatus'])->name('beds.update-status');
     Route::get('/beds/{bed}/patient/edit', [BedController::class, 'editPatient'])->name('beds.edit-patient');
     Route::put('/beds/{bed}/patient', [BedController::class, 'updatePatient'])->name('beds.update-patient');
+
+    // Room blocking routes
+    Route::post('/rooms/{room}/block', [WardController::class, 'blockRoom'])->name('rooms.block');
+    Route::post('/rooms/{room}/unblock', [WardController::class, 'unblockRoom'])->name('rooms.unblock');
 });
 
 // Admin Routes (no ward selection required)
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
 
@@ -57,6 +64,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/super-admin/bed', [SuperAdminController::class, 'addBed'])->name('super-admin.add-bed');
     Route::delete('/super-admin/bed/{bed}', [SuperAdminController::class, 'deleteBed'])->name('super-admin.delete-bed');
     Route::resource('users', UserController::class);
+    Route::post('/add-bed', [WardController::class, 'addBed'])->name('add-bed');
+    Route::post('/bassinets', [BassinetController::class, 'store'])->name('super-admin.add-bassinet');
+    Route::delete('/bassinets/{bassinet}', [BassinetController::class, 'destroy'])->name('super-admin.delete-bassinet');
 });
 
 // Register Admin Middleware in App\Providers\AppServiceProvider.php boot() method with:
@@ -88,6 +98,12 @@ Route::get('/rooms/{room}/available-beds', function (App\Models\Room $room) {
         Log::info('Fetching available beds for room: ' . $room->id);
         $beds = $room->beds()
             ->where('status', 'Available')
+            ->whereHas('room', function($query) {
+                $query->where('is_blocked', false);
+            })
+            ->whereHas('room.ward', function($query) {
+                $query->where('is_blocked', false);
+            })
             ->select('id', 'bed_number')
             ->get();
         Log::info('Found available beds: ' . $beds->count());
@@ -103,6 +119,12 @@ Route::get('/rooms/{room}/transfer-out-beds', function (App\Models\Room $room) {
         Log::info('Fetching transfer-out beds for room: ' . $room->id);
         $beds = $room->beds()
             ->where('status', 'Transfer-out')
+            ->whereHas('room', function($query) {
+                $query->where('is_blocked', false);
+            })
+            ->whereHas('room.ward', function($query) {
+                $query->where('is_blocked', false);
+            })
             ->select('id', 'bed_number')
             ->get();
         Log::info('Found transfer-out beds: ' . $beds->count());
@@ -123,4 +145,57 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/chat/{chatRoom}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
     Route::put('/chat/{chatRoom}/name', [ChatController::class, 'updateName'])->name('chat.update.name');
     Route::post('/chat/typing', [ChatController::class, 'typing'])->name('chat.typing');
+    Route::post('/chat-rooms/{chatRoom}/messages', [ChatMessageController::class, 'store'])->name('chat-messages.store');
+    Route::post('/chat-messages/{message}/reply', [ChatMessageController::class, 'reply'])->name('chat-messages.reply');
 });
+
+// Test route for Pusher integration
+Route::get('/test-pusher', function () {
+    try {
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => true,
+                'debug' => true,
+            ]
+        );
+        
+        $data = ['message' => 'This is a test message from the server', 'time' => now()->toDateTimeString()];
+        
+        // Send to a test channel
+        $pusher->trigger('test-channel', 'test-event', $data);
+        
+        return [
+            'success' => true, 
+            'message' => 'Test event sent to Pusher', 
+            'data' => $data,
+            'pusher_config' => [
+                'key' => env('PUSHER_APP_KEY'),
+                'cluster' => env('PUSHER_APP_CLUSTER')
+            ]
+        ];
+    } catch (\Exception $e) {
+        \Log::error('Test Pusher error: ' . $e->getMessage(), ['exception' => $e]);
+        return [
+            'success' => false, 
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ];
+    }
+});
+
+// Debug route for Pusher
+Route::get('/debug-pusher', function () {
+    return view('debug-pusher');
+});
+
+// Room sequence management
+Route::post('/rooms/update-sequence', [WardController::class, 'updateRoomSequence'])->name('super-admin.update-room-sequence');
+
+// Bassinet routes
+Route::get('/bassinets/{bassinet}', [BassinetController::class, 'show'])->name('bassinets.show');
+Route::post('/bassinets/{bassinet}/transfer', [BassinetController::class, 'transfer'])->name('bassinets.transfer');
+Route::post('/bassinets', [BassinetController::class, 'store'])->name('bassinets.store');

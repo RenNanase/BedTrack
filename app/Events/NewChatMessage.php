@@ -22,8 +22,8 @@ class NewChatMessage implements ShouldBroadcast
      */
     public function __construct(ChatMessage $message)
     {
-        // Eager load user relation
-        $this->message = $message->load('user');
+        // Eager load user and replyTo relations
+        $this->message = $message->load(['user', 'replyTo.user']);
         
         \Log::debug('Constructing NewChatMessage event', ['message_id' => $message->id]);
     }
@@ -33,14 +33,14 @@ class NewChatMessage implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        $channel = 'chat.' . $this->message->chat_room_id;
-        \Log::info('Broadcasting message on channel: ' . $channel, [
+        $channel = new Channel('chat.' . $this->message->chat_room_id);
+        \Log::info('Broadcasting message on channel: ' . $channel->name, [
             'message_id' => $this->message->id,
             'chat_room_id' => $this->message->chat_room_id,
             'user_id' => $this->message->user_id
         ]);
         
-        return new Channel($channel);
+        return $channel;
     }
 
     /**
@@ -66,6 +66,14 @@ class NewChatMessage implements ShouldBroadcast
                     'id' => $this->message->user->id,
                     'name' => $this->message->user->name,
                 ],
+                'reply_to' => $this->message->reply_to ? [
+                    'id' => $this->message->reply_to->id,
+                    'message' => $this->message->reply_to->message,
+                    'user' => [
+                        'id' => $this->message->reply_to->user->id,
+                        'name' => $this->message->reply_to->user->name,
+                    ],
+                ] : null,
             ],
         ];
         

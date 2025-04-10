@@ -86,13 +86,13 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $transfer->sourceBed->room->ward->ward_name }}</div>
                                 <div class="text-sm text-gray-500">
-                                    {{ $transfer->sourceBed->room->room_name }} - Bed {{ $transfer->sourceBed->bed_number }}
+                                    {{ $transfer->sourceBed->room->room_name }} - {{ $transfer->sourceBed->bed_number }}
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $transfer->destinationBed->room->ward->ward_name }}</div>
                                 <div class="text-sm text-gray-500">
-                                    {{ $transfer->destinationBed->room->room_name }} - Bed {{ $transfer->destinationBed->bed_number }}
+                                    {{ $transfer->destinationBed->room->room_name }} - {{ $transfer->destinationBed->bed_number }}
                                 </div>
                             </td>
                             <td class="px-6 py-4">

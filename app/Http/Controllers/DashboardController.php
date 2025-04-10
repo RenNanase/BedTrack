@@ -21,16 +21,15 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Get the selected ward from the session
         $selectedWardId = session('selected_ward_id');
-
         if (!$selectedWardId) {
-            return redirect()->route('select.ward');
+            return redirect()->route('ward.select');
         }
 
-        $ward = Ward::with(['rooms.beds' => function ($query) {
+        $ward = Ward::find($selectedWardId);
+        $rooms = $ward->rooms()->with(['beds' => function($query) {
             $query->orderBy('bed_number');
-        }])->findOrFail($selectedWardId);
+        }])->orderBy('sequence')->get();
 
         // If it's the nursery ward, redirect to nursery.index
         if ($ward->ward_name === 'Nursery Ward') {
@@ -38,31 +37,35 @@ class DashboardController extends Controller
         }
 
         // Count total beds in the ward
-        $totalBeds = Bed::whereHas('room', function ($query) use ($selectedWardId) {
-            $query->where('ward_id', $selectedWardId);
+        $totalBeds = Bed::whereHas('room', function ($query) use ($ward) {
+            $query->where('ward_id', $ward->id);
         })->count();
 
         // Count beds by status
         $bedCounts = [
-            'available' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
-                $query->where('ward_id', $selectedWardId);
+            'available' => Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id);
             })->where('status', 'Available')->count(),
 
-            'booked' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
-                $query->where('ward_id', $selectedWardId);
+            'booked' => Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id);
             })->where('status', 'Booked')->count(),
 
-            'occupied' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
-                $query->where('ward_id', $selectedWardId);
+            'occupied' => Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id);
             })->where('status', 'Occupied')->count(),
 
-            'discharged' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
-                $query->where('ward_id', $selectedWardId);
+            'discharged' => Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id);
             })->where('status', 'Discharged')->count(),
 
-            'housekeeping' => Bed::whereHas('room', function ($query) use ($selectedWardId) {
-                $query->where('ward_id', $selectedWardId);
+            'housekeeping' => Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id);
             })->where('status', 'Housekeeping')->count(),
+            
+            'transfer_in' => Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id);
+            })->where('status', 'Transfer-in')->count(),
         ];
 
         // Calculate percentages
@@ -78,8 +81,8 @@ class DashboardController extends Controller
         $currentDateTime = Carbon::now()->format('F d, Y - h:i A');
 
         // Get recent discharges from the discharge_logs table
-        $recentDischarges = DischargeLog::whereHas('room', function ($query) use ($selectedWardId) {
-            $query->where('ward_id', $selectedWardId);
+        $recentDischarges = DischargeLog::whereHas('room', function ($query) use ($ward) {
+            $query->where('ward_id', $ward->id);
         })
         ->with(['bed', 'room'])
         ->orderBy('discharged_at', 'desc')
@@ -87,8 +90,8 @@ class DashboardController extends Controller
         ->get();
 
         // Get today's discharge count
-        $todayDischarges = DischargeLog::whereHas('room', function ($query) use ($selectedWardId) {
-            $query->where('ward_id', $selectedWardId);
+        $todayDischarges = DischargeLog::whereHas('room', function ($query) use ($ward) {
+            $query->where('ward_id', $ward->id);
         })
         ->whereDate('discharged_at', Carbon::today())
         ->count();
@@ -107,6 +110,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'ward',
+            'rooms',
             'bedCounts',
             'percentages',
             'totalBeds',

@@ -12,8 +12,9 @@ class TransferLog extends Model
 
     protected $fillable = [
         'source_bed_id',
-        'destination_bed_id',
         'source_room_id',
+        'source_bassinet_id',
+        'destination_bed_id',
         'destination_room_id',
         'patient_name',
         'patient_category',
@@ -21,6 +22,9 @@ class TransferLog extends Model
         'mrn',
         'notes',
         'transferred_at',
+        'had_hazard',
+        'maintained_hazard',
+        'transfer_remarks',
     ];
 
     protected $casts = [
@@ -57,5 +61,10 @@ class TransferLog extends Model
     public function destinationRoom(): BelongsTo
     {
         return $this->belongsTo(Room::class, 'destination_room_id');
+    }
+
+    public function sourceBassinet()
+    {
+        return $this->belongsTo(Bassinet::class, 'source_bassinet_id');
     }
 }

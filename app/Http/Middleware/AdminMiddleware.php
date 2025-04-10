@@ -16,7 +16,7 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !Auth::user()->is_admin) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
             return redirect()->route('dashboard')
                 ->with('error', 'You do not have admin access.');
         }

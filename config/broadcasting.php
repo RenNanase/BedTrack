@@ -17,11 +17,19 @@ return [
                 'encrypted' => true,
                 'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
                 'cors' => true,
+                'debug' => true,
+                'allowed_origins' => [
+                    'http://localhost:8000',
+                    'http://10.2.10.178',
+                    'http://10.2.10.178/BedTrack/public'
+                ],
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
                 'timeout' => 30,
                 'connect_timeout' => 10,
+                'verify' => false,
+                'debug' => true,
             ],
         ],
 

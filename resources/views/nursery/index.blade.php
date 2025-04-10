@@ -15,6 +15,13 @@
                 <h1 class="text-3xl font-bold text-gray-800">Nursery Ward Dashboard</h1>
                 <p class="text-sm text-gray-500">Last updated: {{ $currentDateTime }}</p>
             </div>
+            <div class="flex space-x-3">
+                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'superadmin')
+                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-accent/90 transition-colors">
+                    Admin Dashboard
+                </a>
+                @endif
+            </div>
         </div>
 
         <!-- Main Dashboard Content with Activity Timeline -->
@@ -238,7 +245,7 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-gray-900">{{ $transferInCribs['transfer_in'] ?? 0 }}</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $transferInCribs }}</div>
                         <div class="text-xs text-gray-500">Transfer In</div>
                     </div>
                 </div>
@@ -277,7 +284,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <a href="{{ route('beds.show', $discharge->bed_id) }}"
                                         class="text-primary hover:text-primary-dark">
-                                        Bed #{{ $discharge->bed->bed_number }}
+                                        {{ $discharge->bed->bed_number }}
                                     </a>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -338,7 +345,7 @@
                                     Bed {{ $transfer->sourceBed->bed_number }}
                                 </p>
                                 <p class="text-sm text-gray-500">
-                                    To: Nursery Room - Crib {{ $transfer->destinationBed->bed_number }}
+                                    To: Nursery Room - {{ $transfer->destinationBed->bed_number }}
                                 </p>
                                 <p class="text-sm text-gray-500">
                                     {{ $transfer->patient_category }} | {{ $transfer->gender }} | MRN: {{ $transfer->mrn
@@ -373,7 +380,7 @@
                             <div>
                                 <h4 class="font-medium text-gray-900">{{ $transfer->patient_name }}</h4>
                                 <p class="text-sm text-gray-500">
-                                    From: Nursery Room - Crib {{ $transfer->sourceBed->bed_number }}
+                                    From: Nursery Room - {{ $transfer->sourceBed->bed_number }}
                                 </p>
                                 <p class="text-sm text-gray-500">
                                     To: {{ $transfer->destinationBed->room->ward->ward_name }} -

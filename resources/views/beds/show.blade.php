@@ -167,6 +167,24 @@
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                                             <option value="">Select a bed...</option>
                                         </select>
+                                        
+                                        <!-- Maintain Hazard Option (Only shown when source bed has hazard) -->
+                                        @if($bed->has_hazard)
+                                        <div class="mt-3 flex items-center">
+                                            <input type="checkbox" name="maintain_hazard" id="maintain_hazard" value="1" checked class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                            <label for="maintain_hazard" class="ml-2 block text-sm text-gray-700">
+                                                Transfer hazard status with the patient
+                                            </label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1 ml-6">
+                                            <span class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                                Hazard status will follow the patient to their new bed. If unchecked, hazard will be removed completely.
+                                            </span>
+                                        </p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -451,7 +469,7 @@ function loadRooms(wardId) {
     roomContainer.classList.remove('hidden');
 
     // Fetch rooms for the selected ward
-    fetch(`/wards/${wardId}/rooms`, {
+    fetch(`/BedTrack/public/wards/${wardId}/rooms`, {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -494,7 +512,7 @@ function loadBeds(roomId) {
     bedContainer.classList.remove('hidden');
 
     // Fetch available beds for the selected room
-    fetch(`/rooms/${roomId}/available-beds`, {
+    fetch(`/BedTrack/public/rooms/${roomId}/available-beds`, {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -541,7 +559,7 @@ function loadSourceRooms(wardId) {
     roomContainer.classList.remove('hidden');
 
     // Fetch rooms for the selected ward
-    fetch(`/wards/${wardId}/rooms`, {
+    fetch(`/BedTrack/public/wards/${wardId}/rooms`, {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -584,7 +602,7 @@ function loadSourceBeds(roomId) {
     bedContainer.classList.remove('hidden');
 
     // Fetch transfer-out beds for the selected room
-    fetch(`/rooms/${roomId}/transfer-out-beds`, {
+    fetch(`/BedTrack/public/rooms/${roomId}/transfer-out-beds`, {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'

@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\App;
+use App\Fixes\LogManagerFix;
 use Pusher\Pusher;
 
 class BroadcastServiceProvider extends ServiceProvider
@@ -19,6 +20,7 @@ class BroadcastServiceProvider extends ServiceProvider
             $this->registerPusher();
         }
         
+        // Set broadcasting routes with explicit cross-domain support
         Broadcast::routes(['middleware' => ['web', 'auth']]);
 
         require base_path('routes/channels.php');
@@ -32,13 +34,21 @@ class BroadcastServiceProvider extends ServiceProvider
         $this->app->singleton(Pusher::class, function () {
             $config = config('broadcasting.connections.pusher');
             
-            return new Pusher(
+            $pusher = new Pusher(
                 $config['key'],
                 $config['secret'],
                 $config['app_id'],
                 $config['options'] ?? [],
                 $config['client_options'] ?? []
             );
+            
+            // Enable debugging on the Pusher instance if we're in local environment
+            if (config('app.debug')) {
+                // Create a custom logger wrapper to prevent null values
+                $pusher->setLogger(LogManagerFix::getLogger());
+            }
+            
+            return $pusher;
         });
     }
 } 

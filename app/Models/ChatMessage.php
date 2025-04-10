@@ -13,8 +13,11 @@ class ChatMessage extends Model
         'user_id',
         'message',
         'type',
-        'file_url'
+        'file_url',
+        'reply_to_id',
     ];
+
+    protected $with = ['user', 'replyTo'];
 
     public function chatRoom(): BelongsTo
     {
@@ -34,5 +37,15 @@ class ChatMessage extends Model
     public function isReadBy(User $user): bool
     {
         return $this->reads()->where('user_id', $user->id)->exists();
+    }
+
+    public function replyTo()
+    {
+        return $this->belongsTo(ChatMessage::class, 'reply_to_id')->with('user');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(ChatMessage::class, 'reply_to_id');
     }
 }

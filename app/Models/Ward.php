@@ -13,6 +13,15 @@ class Ward extends Model
 
     protected $fillable = [
         'ward_name',
+        'is_blocked',
+        'block_remarks',
+        'blocked_at',
+        'blocked_by'
+    ];
+
+    protected $casts = [
+        'is_blocked' => 'boolean',
+        'blocked_at' => 'datetime'
     ];
 
     /**
@@ -29,5 +38,15 @@ class Ward extends Model
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class);
+    }
+
+    public function blockedByUser()
+    {
+        return $this->belongsTo(User::class, 'blocked_by');
+    }
+
+    public function scopeNotBlocked($query)
+    {
+        return $query->where('is_blocked', false);
     }
 }

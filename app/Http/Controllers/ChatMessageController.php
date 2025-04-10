@@ -3,70 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Events\ChatTyping;
-use App\Events\NewChatMessage;
+use App\Events\NewChatMessage as NewChatMessageEvent;
 use App\Models\ChatMessage;
 use App\Models\ChatRoom;
 use App\Models\MessageRead;
+use App\Notifications\NewChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ChatMessageController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, ChatRoom $chatRoom)
     {
-        $validated = $request->validate([
-            'message' => 'required|string|max:500',
-            'chat_room_id' => 'required|exists:chat_rooms,id',
+        $request->validate([
+            'message' => 'required|string',
+            'reply_to_id' => 'nullable|exists:chat_messages,id',
         ]);
 
-        // Check if user has access to this chat room
-        $chatRoom = ChatRoom::findOrFail($validated['chat_room_id']);
-        
-        // For global chat, any authenticated user can post
-        if ($chatRoom->type !== 'global') {
-            // For other chat types, check if user is a member
-            $hasAccess = $chatRoom->users()->where('users.id', Auth::id())->exists();
-            if (!$hasAccess) {
-                return response()->json(['message' => 'You do not have access to this chat room'], 403);
-            }
-        }
-
-        // Create the message
-        $message = new ChatMessage();
-        $message->message = $validated['message'];
-        $message->chat_room_id = $validated['chat_room_id'];
-        $message->user_id = Auth::id();
-        $message->save();
-
-        // Mark as read by sender
-        MessageRead::create([
-            'message_id' => $message->id,
-            'user_id' => Auth::id(),
+        $message = $chatRoom->messages()->create([
+            'user_id' => auth()->id(),
+            'message' => $request->message,
+            'reply_to_id' => $request->reply_to_id,
         ]);
 
-        // Load user for response
-        $message->load('user');
+        // Broadcast the message
+        broadcast(new NewChatMessageEvent($message))->toOthers();
 
-        // Broadcast the message to the channel
-        try {
-            Log::info('Broadcasting new chat message', [
-                'message_id' => $message->id,
-                'chat_room_id' => $message->chat_room_id,
-                'user_id' => $message->user_id
-            ]);
-            
-            event(new NewChatMessage($message));
-            
-            Log::info('Broadcast event dispatched successfully');
-        } catch (\Exception $e) {
-            Log::error('Error broadcasting message:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
+        // Notify other users in the room
+        $chatRoom->users()
+            ->where('users.id', '!=', auth()->id())
+            ->each(function ($user) use ($message) {
+                $user->notify(new NewChatMessage($message));
+            });
 
-        return response()->json($message);
+        return response()->json($message->load('user', 'replyTo'));
+    }
+
+    public function reply(Request $request, ChatMessage $message)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $reply = $message->chatRoom->messages()->create([
+            'user_id' => auth()->id(),
+            'message' => $request->message,
+            'reply_to_id' => $message->id,
+        ]);
+
+        // Notify other users in the room
+        $message->chatRoom->users()
+            ->where('users.id', '!=', auth()->id())
+            ->each(function ($user) use ($reply) {
+                $user->notify(new NewChatMessage($reply));
+            });
+
+        return response()->json($reply->load('user', 'replyTo'));
     }
 
     public function typing(Request $request)

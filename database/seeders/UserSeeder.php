@@ -19,10 +19,10 @@ class UserSeeder extends Seeder
         $wards = Ward::all();
         foreach ($wards as $ward) {
             $user = User::create([
-                'name' => $ward->ward_name . ' Staff',
-                'email' => strtolower(str_replace(' ', '', $ward->ward_name)) . '@example.com',
+                'name' => strtolower(str_replace(' ', '', $ward->ward_name)),
                 'password' => Hash::make('password'),
                 'role' => 'staff',
+                'ward_id' => $ward->id,
             ]);
 
             // Assign user to the ward

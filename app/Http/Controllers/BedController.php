@@ -18,17 +18,31 @@ class BedController extends Controller
     public function show(Bed $bed)
     {
         // Get all wards except the current bed's ward
-        $wards = \App\Models\Ward::where('id', '!=', $bed->room->ward_id)->get();
+        $wards = \App\Models\Ward::where('id', '!=', $bed->room->ward_id)
+            ->where('is_blocked', false)
+            ->get();
 
-        // Get all available beds for transfer-out
+        // Get all available beds for transfer-out (excluding beds from blocked rooms)
         $availableBeds = Bed::where('status', 'Available')
             ->where('id', '!=', $bed->id)
+            ->whereHas('room', function($query) {
+                $query->where('is_blocked', false);
+            })
+            ->whereHas('room.ward', function($query) {
+                $query->where('is_blocked', false);
+            })
             ->with('room')
             ->get();
 
-        // Get all beds in transfer-out status for transfer-in
+        // Get all beds in transfer-out status for transfer-in (excluding beds from blocked rooms)
         $transferOutBeds = Bed::where('status', 'Transfer-out')
             ->where('id', '!=', $bed->id)
+            ->whereHas('room', function($query) {
+                $query->where('is_blocked', false);
+            })
+            ->whereHas('room.ward', function($query) {
+                $query->where('is_blocked', false);
+            })
             ->with('room')
             ->get();
 
@@ -51,6 +65,7 @@ class BedController extends Controller
             'hazard_notes' => 'nullable|string|max:500',
             'transfer_destination_bed_id' => 'nullable|required_if:status,Transfer-out|exists:beds,id',
             'transfer_source_bed_id' => 'nullable|required_if:status,Transfer-in|exists:beds,id',
+            'maintain_hazard' => 'nullable|boolean',
         ]);
 
         $oldStatus = $bed->status;
@@ -77,6 +92,8 @@ class BedController extends Controller
                 'mrn' => $bed->mrn,
                 'notes' => $bed->notes,
                 'transferred_at' => Carbon::now(),
+                'had_hazard' => $bed->has_hazard,
+                'maintained_hazard' => isset($request->maintain_hazard) && $request->maintain_hazard,
             ]);
 
             // Log the transfer activity
@@ -96,6 +113,9 @@ class BedController extends Controller
                 'mrn' => $bed->mrn,
                 'notes' => $bed->notes,
                 'status_changed_at' => Carbon::now(),
+                // Only transfer hazard status if maintain_hazard is checked
+                'has_hazard' => isset($request->maintain_hazard) && $request->maintain_hazard ? $bed->has_hazard : false,
+                'hazard_notes' => isset($request->maintain_hazard) && $request->maintain_hazard ? $bed->hazard_notes : null,
             ]);
 
             // Clear source bed
@@ -107,6 +127,8 @@ class BedController extends Controller
                 'mrn' => null,
                 'notes' => null,
                 'status_changed_at' => Carbon::now(),
+                'has_hazard' => false,
+                'hazard_notes' => null,
             ]);
 
             return redirect()->route('dashboard')->with('success', "Patient transferred successfully to {$destinationBed->room->room_name} - {$destinationBed->bed_number}");
@@ -121,7 +143,13 @@ class BedController extends Controller
                 return back()->with('error', 'Source bed is not in transfer-out status.');
             }
 
-            // Update bed status to Occupied
+            // Find the transfer log to check if there was a hazard
+            $transferLog = TransferLog::where('source_bed_id', $sourceBed->id)
+                ->where('destination_bed_id', $bed->id)
+                ->latest()
+                ->first();
+
+            // Update bed status to Occupied with hazard information if applicable
             $bed->update([
                 'status' => 'Occupied',
                 'patient_name' => $sourceBed->patient_name,
@@ -130,6 +158,9 @@ class BedController extends Controller
                 'mrn' => $sourceBed->mrn,
                 'notes' => $sourceBed->notes,
                 'status_changed_at' => Carbon::now(),
+                // Check transfer log for hazard information
+                'has_hazard' => $transferLog && $transferLog->had_hazard && $transferLog->maintained_hazard ? true : false,
+                'hazard_notes' => $transferLog && $transferLog->had_hazard && $transferLog->maintained_hazard ? $sourceBed->hazard_notes : null,
             ]);
 
             return redirect()->route('dashboard')->with('success', "Patient transferred in successfully to {$bed->room->room_name} - {$bed->bed_number}");
@@ -169,6 +200,9 @@ class BedController extends Controller
                 'housekeeping_started_at' => Carbon::now(),
                 // Keep patient info for reference until housekeeping is complete
                 'status_changed_at' => Carbon::now(),
+                // Clear hazard when patient is discharged
+                'has_hazard' => false,
+                'hazard_notes' => null,
             ]);
 
             return redirect()->route('dashboard')->with('success', "Patient discharged and bed {$bed->bed_number} is now in housekeeping.");
@@ -193,6 +227,9 @@ class BedController extends Controller
             $validated['mrn'] = null;
             $validated['notes'] = null;
             $validated['housekeeping_started_at'] = null;
+            // Also clear hazard information when bed is made available
+            $validated['has_hazard'] = false;
+            $validated['hazard_notes'] = null;
         }
         // If status is explicitly set to Housekeeping
         elseif ($validated['status'] === 'Housekeeping') {
@@ -206,32 +243,26 @@ class BedController extends Controller
 
         // Set has_hazard field if present in the request
         if (isset($request->has_hazard)) {
-            $bed->has_hazard = $request->has_hazard;
+            $validated['has_hazard'] = $request->has_hazard;
             if (!$request->has_hazard) {
-                $bed->hazard_notes = null; // Clear hazard notes when hazard is removed
+                $validated['hazard_notes'] = null; // Clear hazard notes when hazard is removed
             } else {
-                $bed->hazard_notes = $request->hazard_notes;
+                $validated['hazard_notes'] = $request->hazard_notes;
             }
+        } else {
+            // If has_hazard is not present in the request, it means the checkbox was unchecked
+            $validated['has_hazard'] = false;
+            $validated['hazard_notes'] = null;
         }
 
-        // If status is changed to Available, clear patient information
-        if ($validated['status'] === 'Available' && $oldStatus !== 'Available') {
-            $validated['patient_name'] = null;
-            $validated['patient_category'] = null;
-            $validated['gender'] = null;
-            $validated['mrn'] = null;
-            $validated['notes'] = null;
-            $validated['housekeeping_started_at'] = null;
-            // Don't clear hazard information as it might be room-specific
-        }
-
+        // Update the bed with all validated data
         $bed->update($validated);
 
-        // Log the status update activity
+        // Log the activity
         ActivityLogger::log(
             'Updated Bed Status',
-            "Changed bed {$bed->bed_number} status from {$oldStatus} to {$newStatus}" .
-            ($validated['patient_name'] ? " for patient {$validated['patient_name']}" : ""),
+            "Updated bed {$bed->bed_number} in {$bed->room->room_name} to {$validated['status']}" . 
+            ($validated['has_hazard'] ? " with hazard" : " without hazard"),
             Bed::class,
             $bed->id
         );
