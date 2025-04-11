@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\DB;
 
 class SuperAdminController extends Controller
 {
@@ -112,30 +113,42 @@ class SuperAdminController extends Controller
      */
     public function addRoom(Request $request)
     {
-        $this->checkSuperAdmin();
+        try {
+            DB::beginTransaction();
 
-        $request->validate([
-            'ward_id' => 'required|exists:wards,id',
-            'room_name' => 'required|string|max:255',
-            'room_type' => 'required|in:regular,nursery',
-        ]);
+            $request->validate([
+                'ward_id' => 'required|exists:wards,id',
+                'room_name' => 'required|string|max:255',
+                'room_type' => 'required|in:regular,nursery',
+            ]);
 
-        $roomData = [
-            'ward_id' => $request->ward_id,
-            'room_name' => $request->room_name,
-            'room_type' => $request->room_type,
-            'capacity' => 0, // Default capacity
-        ];
+            $ward = Ward::findOrFail($request->ward_id);
+            
+            // Get the highest sequence number for this ward
+            $maxSequence = Room::where('ward_id', $ward->id)->max('sequence');
+            $newSequence = ($maxSequence ?? 0) + 1;
 
-        // For backward compatibility
-        if ($request->has('room_number')) {
-            $roomData['room_number'] = $request->room_number;
+            $room = Room::create([
+                'ward_id' => $ward->id,
+                'room_name' => $request->room_name,
+                'room_type' => $request->room_type,
+                'sequence' => $newSequence,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Room added successfully.',
+                'room' => $room
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add room: ' . $e->getMessage()
+            ], 500);
         }
-
-        Room::create($roomData);
-
-        return redirect()->route('super-admin.ward-management')
-            ->with('success', 'Room added successfully.');
     }
 
     /**

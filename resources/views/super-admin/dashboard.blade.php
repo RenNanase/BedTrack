@@ -97,27 +97,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Recent Activity Section -->
-        <div class="mt-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-4">
-                    <div class="space-y-4">
-                        @forelse($recentActivities as $activity)
-                            <div class="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
-                                <div>
-                                    <p class="text-sm text-gray-900">{{ $activity->description }}</p>
-                                    <p class="text-xs text-gray-500">{{ $activity->created_at->diffForHumans() }}</p>
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-gray-500 text-center py-4">No recent activity</p>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

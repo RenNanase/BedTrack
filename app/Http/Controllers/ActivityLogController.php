@@ -3,11 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
-use App\Services\ActivityLogger;
+use App\Models\Ward;
 use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
 {
+    public function index()
+    {
+        $activityLogs = ActivityLog::with(['user', 'bed.room.ward'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        $wards = Ward::all();
+        $hasMoreLogs = ActivityLog::count() > 5;
+
+        return view('activity-logs.index', compact('activityLogs', 'wards', 'hasMoreLogs'));
+    }
+
     /**
      * Load more activity logs for AJAX requests
      *
@@ -16,41 +29,35 @@ class ActivityLogController extends Controller
      */
     public function loadMore(Request $request)
     {
-        // Validate request
-        $request->validate([
-            'offset' => 'required|integer|min:0',
-            'limit' => 'required|integer|min:1|max:20',
-        ]);
+        $offset = $request->input('offset', 0);
+        $limit = $request->input('limit', 5);
+        $action = $request->input('action');
+        $ward = $request->input('ward');
 
-        $offset = $request->input('offset');
-        $limit = $request->input('limit');
-        $wardId = session('selected_ward_id');
+        $query = ActivityLog::with(['user', 'bed.room.ward'])
+            ->orderBy('created_at', 'desc');
 
-        // Get more activity logs
-        $logs = ActivityLog::with('user')
-            ->where('action', '!=', 'Viewed Dashboard')
-            ->when($wardId, function ($query) use ($wardId) {
-                return $query->where('ward_id', $wardId);
-            })
-            ->orderBy('created_at', 'desc')
-            ->skip($offset)
+        if ($action) {
+            $query->where('action', $action);
+        }
+
+        if ($ward) {
+            $query->whereHas('bed.room', function ($q) use ($ward) {
+                $q->where('ward_id', $ward);
+            });
+        }
+
+        $activityLogs = $query->skip($offset)
             ->take($limit)
             ->get();
 
-        // Check if there are more logs 
-        $moreLogsExist = ActivityLog::where('action', '!=', 'Viewed Dashboard')
-            ->when($wardId, function ($query) use ($wardId) {
-                return $query->where('ward_id', $wardId);
-            })
-            ->orderBy('created_at', 'desc')
-            ->skip($offset + $limit)
-            ->take(1)
-            ->exists();
+        $hasMoreLogs = $query->count() > ($offset + $limit);
 
-        // Return logs as HTML partials
+        $html = view('partials.activity-logs', compact('activityLogs'))->render();
+
         return response()->json([
-            'html' => view('partials.activity-logs', ['activityLogs' => $logs])->render(),
-            'hasMore' => $moreLogsExist
+            'html' => $html,
+            'hasMore' => $hasMoreLogs
         ]);
     }
 }

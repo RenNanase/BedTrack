@@ -20,7 +20,11 @@ return new class extends Migration
             $table->string('patient_category')->nullable();
             $table->boolean('has_hazard')->default(false);
             $table->text('hazard_notes')->nullable();
+            $table->string('mother_name')->nullable();
+            $table->string('mother_mrn')->nullable();
+            $table->timestamp('occupied_at')->nullable();
             $table->timestamp('status_changed_at')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

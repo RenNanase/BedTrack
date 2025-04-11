@@ -46,6 +46,13 @@ Route::middleware(['auth', 'ward.selection'])->group(function () {
     // Room blocking routes
     Route::post('/rooms/{room}/block', [WardController::class, 'blockRoom'])->name('rooms.block');
     Route::post('/rooms/{room}/unblock', [WardController::class, 'unblockRoom'])->name('rooms.unblock');
+
+    // Bassinet routes
+    Route::get('/bassinets/{bassinet}', [BassinetController::class, 'show'])->name('bassinets.show');
+    Route::post('/bassinets/{bassinet}/register', [BassinetController::class, 'register'])->name('bassinets.register');
+    Route::post('/bassinets/{bassinet}/transfer', [BassinetController::class, 'transfer'])->name('bassinets.transfer');
+    Route::post('/bassinets/{bassinet}/discharge', [BassinetController::class, 'discharge'])->name('bassinets.discharge');
+    Route::post('/bassinets', [BassinetController::class, 'store'])->name('bassinets.store');
 });
 
 // Admin Routes (no ward selection required)
@@ -65,14 +72,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/super-admin/bed/{bed}', [SuperAdminController::class, 'deleteBed'])->name('super-admin.delete-bed');
     Route::resource('users', UserController::class);
     Route::post('/add-bed', [WardController::class, 'addBed'])->name('add-bed');
-    Route::post('/bassinets', [BassinetController::class, 'store'])->name('super-admin.add-bassinet');
-    Route::delete('/bassinets/{bassinet}', [BassinetController::class, 'destroy'])->name('super-admin.delete-bassinet');
+    Route::post('/super-admin/bassinets', [BassinetController::class, 'store'])->name('super-admin.add-bassinet');
+    Route::delete('/super-admin/bassinets/{bassinet}', [BassinetController::class, 'destroy'])->name('super-admin.delete-bassinet');
+    Route::get('/activity-logs/load-more', [App\Http\Controllers\ActivityLogController::class, 'loadMore'])->name('activity-logs.load-more');
+    Route::get('/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
 });
 
 // Register Admin Middleware in App\Providers\AppServiceProvider.php boot() method with:
 // Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
-
-Route::get('/activity-logs/load-more', [App\Http\Controllers\ActivityLogController::class, 'loadMore'])->name('activity-logs.load-more');
 
 // Room and Bed Management Routes
 Route::get('/ward/{ward}/add-nursery-cribs', [RoomBedManagementController::class, 'addNurseryCribs'])->name('room-management.add-nursery-cribs');
@@ -194,8 +201,3 @@ Route::get('/debug-pusher', function () {
 
 // Room sequence management
 Route::post('/rooms/update-sequence', [WardController::class, 'updateRoomSequence'])->name('super-admin.update-room-sequence');
-
-// Bassinet routes
-Route::get('/bassinets/{bassinet}', [BassinetController::class, 'show'])->name('bassinets.show');
-Route::post('/bassinets/{bassinet}/transfer', [BassinetController::class, 'transfer'])->name('bassinets.transfer');
-Route::post('/bassinets', [BassinetController::class, 'store'])->name('bassinets.store');

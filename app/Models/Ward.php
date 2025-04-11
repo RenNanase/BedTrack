@@ -16,12 +16,14 @@ class Ward extends Model
         'is_blocked',
         'block_remarks',
         'blocked_at',
-        'blocked_by'
+        'blocked_by',
+        'is_nursery'
     ];
 
     protected $casts = [
         'is_blocked' => 'boolean',
-        'blocked_at' => 'datetime'
+        'blocked_at' => 'datetime',
+        'is_nursery' => 'boolean'
     ];
 
     /**
@@ -48,5 +50,15 @@ class Ward extends Model
     public function scopeNotBlocked($query)
     {
         return $query->where('is_blocked', false);
+    }
+
+    public function scopeNursery($query)
+    {
+        return $query->where('is_nursery', true);
+    }
+
+    public function scopeMaternity($query)
+    {
+        return $query->where('is_nursery', false);
     }
 }

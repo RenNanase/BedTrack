@@ -160,26 +160,26 @@
                                                                         <span class="text-xs text-gray-500 capitalize">{{ $room->room_type }}</span>
                                                                     </div>
                                                                     <div class="flex items-center space-x-2">
-                                                                        <button type="button" 
-                                                                                onclick="toggleRoomDetails('room-{{ $room->id }}')"
-                                                                                class="flex items-center px-2 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-xs">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                                                            </svg>
-                                                                            Beds
-                                                                        </button>
-                                                                        <form action="{{ route('super-admin.delete-room', $room) }}" method="POST" class="inline">
-                                                                            @csrf
-                                                                            @method('DELETE')
-                                                                            <button type="submit" class="flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-xs"
-                                                                                    onclick="return confirm('Are you sure you want to delete this room? This will also delete all beds within this room.')">
+                                                                            <button type="button" 
+                                                                                    onclick="toggleRoomDetails('room-{{ $room->id }}')"
+                                                                                    class="flex items-center px-2 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-xs">
                                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                                                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                                                                 </svg>
-                                                                                Delete
+                                                                                Beds
                                                                             </button>
-                                                                        </form>
-                                                                    </div>
+                                                                            <form action="{{ route('super-admin.delete-room', $room) }}" method="POST" class="inline">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="submit" class="flex items-center px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-xs"
+                                                                                        onclick="return confirm('Are you sure you want to delete this room? This will also delete all beds within this room.')">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                                                    </svg>
+                                                                                    Delete
+                                                                                </button>
+                                                                            </form>
+                                                                        </div>
                                                                 </div>
                                                                 <!-- Room Details Section (Hidden by Default) -->
                                                                 <div id="room-{{ $room->id }}" class="hidden mt-4">
@@ -232,8 +232,8 @@
                                                                                 </div>
                                                                                 <div class="flex justify-end">
                                                                                     <button type="submit" class="px-3 py-1 bg-teal-600 text-white rounded-md hover:bg-teal-500 transition-colors text-xs">
-                                                                                        Add Bed
-                                                                                    </button>
+                                                                                            Add Bed
+                                                                                        </button>
                                                                                 </div>
                                                                             </form>
                                                                         </div>
@@ -251,8 +251,8 @@
                                                                                                 ($bassinet->status === 'Transfer-in' ? 'bg-purple-50 border-purple-200' :
                                                                                                 'bg-gray-50 border-gray-200')))
                                                                                             }}">
-                                                                                                <div class="flex justify-between items-start">
-                                                                                                    <div>
+                                                                                            <div class="flex justify-between items-start">
+                                                                                                <div>
                                                                                                         <h6 class="font-medium text-gray-900">Bassinet {{ $bassinet->bassinet_number }}</h6>
                                                                                                         <p class="text-sm text-gray-500">
                                                                                                             Status: <span class="font-medium">{{ $bassinet->status }}</span>
@@ -265,21 +265,21 @@
                                                                                                                 @endif
                                                                                                             </p>
                                                                                                         @endif
-                                                                                                    </div>
+                                                                                                </div>
                                                                                                     <form action="{{ route('super-admin.delete-bassinet', $bassinet) }}" method="POST" class="inline">
-                                                                                                        @csrf
-                                                                                                        @method('DELETE')
+                                                                                                    @csrf
+                                                                                                    @method('DELETE')
                                                                                                         <button type="submit" class="text-red-600 hover:text-red-800" 
                                                                                                                 onclick="return confirm('Are you sure you want to delete this bassinet?')">
                                                                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                                                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                                                                            </svg>
-                                                                                                        </button>
-                                                                                                    </form>
-                                                                                                </div>
+                                                                                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                                                                        </svg>
+                                                                                                    </button>
+                                                                                                </form>
                                                                                             </div>
-                                                                                        @endforeach
-                                                                                    </div>
+                                                                                        </div>
+                                                                                    @endforeach
+                                                                                </div>
                                                                                 @else
                                                                                     <p class="text-sm text-gray-500">No bassinets added to this room yet.</p>
                                                                                 @endif
@@ -303,13 +303,13 @@
                                                                                             </button>
                                                                                         </div>
                                                                                     </form>
-                                                                                </div>
+                                                                            </div>
                                                                             </div>
                                                                         @endif
                                                                     </div>
                                                                 </div>
                                                             </li>
-                                                        @endforeach
+                                                            @endforeach
                                                     </ul>
                                                 </div>
                                             @else
@@ -339,10 +339,18 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 <script>
+    // Store expanded states in sessionStorage
+    function saveExpandedState(id) {
+        const isExpanded = !document.getElementById(id).classList.contains('hidden');
+        sessionStorage.setItem(id, isExpanded);
+    }
+
     function toggleWardDetails(id) {
         const element = document.getElementById(id);
         if (element) {
             element.classList.toggle('hidden');
+            saveExpandedState(id);
+            
             if (!element.classList.contains('hidden')) {
                 // Initialize Sortable for this ward's rooms
                 const roomsList = document.getElementById(`rooms-list-${id.split('-')[1]}`);
@@ -355,7 +363,6 @@
                                 sequence: index
                             }));
                             
-                            // Send the new order to the server
                             fetch('{{ route("super-admin.update-room-sequence") }}', {
                                 method: 'POST',
                                 headers: {
@@ -367,22 +374,12 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    // Show success message
-                                    const successMessage = document.createElement('div');
-                                    successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
-                                    successMessage.textContent = 'Room order updated successfully';
-                                    document.body.appendChild(successMessage);
-                                    setTimeout(() => successMessage.remove(), 3000);
+                                    showMessage('Room order updated successfully', 'success');
                                 }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                // Show error message
-                                const errorMessage = document.createElement('div');
-                                errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
-                                errorMessage.textContent = 'Failed to update room order';
-                                document.body.appendChild(errorMessage);
-                                setTimeout(() => errorMessage.remove(), 3000);
+                                showMessage('Failed to update room order', 'error');
                             });
                         }
                     });
@@ -395,7 +392,184 @@
         const element = document.getElementById(id);
         if (element) {
             element.classList.toggle('hidden');
+            saveExpandedState(id);
         }
     }
+
+    // Show message helper function
+    function showMessage(message, type = 'success') {
+        const messageElement = document.createElement('div');
+        messageElement.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white`;
+        messageElement.textContent = message;
+        document.body.appendChild(messageElement);
+        setTimeout(() => messageElement.remove(), 3000);
+    }
+
+    // Restore expanded states on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Restore ward expanded states
+        document.querySelectorAll('[id^="ward-"]').forEach(element => {
+            const isExpanded = sessionStorage.getItem(element.id) === 'true';
+            if (isExpanded) {
+                element.classList.remove('hidden');
+            }
+        });
+
+        // Restore room expanded states
+        document.querySelectorAll('[id^="room-"]').forEach(element => {
+            const isExpanded = sessionStorage.getItem(element.id) === 'true';
+            if (isExpanded) {
+                element.classList.remove('hidden');
+            }
+        });
+    });
+
+    // Handle room form submission
+    document.querySelectorAll('form[action="{{ route("super-admin.add-room") }}"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const wardId = formData.get('ward_id');
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Keep the ward expanded
+                    const wardId = `ward-${formData.get('ward_id')}`;
+                    sessionStorage.setItem(wardId, 'true');
+                    window.location.reload();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred while adding the room', 'error');
+            });
+        });
+    });
+
+    // Handle bed form submission
+    document.querySelectorAll('form[action="{{ route("super-admin.add-bed") }}"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const roomId = formData.get('room_id');
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Keep both ward and room expanded
+                    const room = document.querySelector(`[data-room-id="${roomId}"]`);
+                    const wardId = room.closest('tr[id^="ward-"]').id;
+                    const roomDetailsId = `room-${roomId}`;
+                    sessionStorage.setItem(wardId, 'true');
+                    sessionStorage.setItem(roomDetailsId, 'true');
+                    window.location.reload();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred while adding the bed', 'error');
+            });
+        });
+    });
+
+    // Handle bassinet form submission
+    document.querySelectorAll('form[action="{{ route("super-admin.add-bassinet") }}"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const roomId = formData.get('room_id');
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Keep both ward and room expanded
+                    const room = document.querySelector(`[data-room-id="${roomId}"]`);
+                    const wardId = room.closest('tr[id^="ward-"]').id;
+                    const roomDetailsId = `room-${roomId}`;
+                    sessionStorage.setItem(wardId, 'true');
+                    sessionStorage.setItem(roomDetailsId, 'true');
+                    window.location.reload();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred while adding the bassinet', 'error');
+            });
+        });
+    });
+
+    // Handle bassinet deletion
+    document.querySelectorAll('form[action*="delete-bassinet"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!confirm('Are you sure you want to delete this bassinet?')) {
+                return;
+            }
+            
+            fetch(this.action, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Keep the expanded states
+                    const room = this.closest('[data-room-id]');
+                    const roomId = room.dataset.roomId;
+                    const wardId = room.closest('tr[id^="ward-"]').id;
+                    const roomDetailsId = `room-${roomId}`;
+                    sessionStorage.setItem(wardId, 'true');
+                    sessionStorage.setItem(roomDetailsId, 'true');
+                    window.location.reload();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred while deleting the bassinet', 'error');
+            });
+        });
+    });
 </script>
 @endsection

@@ -9,6 +9,7 @@ use App\Models\ChatRoom;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Bed;
+use Illuminate\Support\Facades\Log;
 
 class WardController extends Controller
 {
@@ -197,6 +198,19 @@ class WardController extends Controller
                 'success' => false,
                 'message' => 'Failed to add bed: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getRooms(Ward $ward)
+    {
+        try {
+            Log::info('Fetching rooms for ward: ' . $ward->id);
+            $rooms = $ward->rooms()->select('id', 'room_name')->get();
+            Log::info('Found rooms: ' . $rooms->count());
+            return response()->json($rooms);
+        } catch (\Exception $e) {
+            Log::error('Error fetching rooms for ward: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to load rooms'], 500);
         }
     }
 }

@@ -23,12 +23,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware('web')->group(function () {
     Route::get('/wards/{ward}/rooms', function (App\Models\Ward $ward) {
         try {
-            Log::info('Fetching rooms for ward: ' . $ward->id);
-            $rooms = $ward->rooms()->select('id', 'room_name')->get();
-            Log::info('Found rooms: ' . $rooms->count());
+            $rooms = $ward->rooms()
+                ->where('is_blocked', false)
+                ->select('id', 'room_name')
+                ->get();
             return response()->json($rooms);
         } catch (\Exception $e) {
-            Log::error('Error fetching rooms for ward: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to load rooms'], 500);
         }
     })->name('api.ward.rooms');
@@ -62,4 +62,17 @@ Route::middleware('web')->group(function () {
             return response()->json(['error' => 'Failed to load beds'], 500);
         }
     })->name('api.room.transfer-out-beds');
+
+    Route::get('/rooms/{room}/available-cribs', function (App\Models\Room $room) {
+        try {
+            $cribs = $room->beds()
+                ->where('status', 'Available')
+                ->where('is_crib', true)
+                ->select('id', 'bed_number')
+                ->get();
+            return response()->json($cribs);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to load cribs'], 500);
+        }
+    })->name('api.room.available-cribs');
 });

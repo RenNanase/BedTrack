@@ -21,12 +21,17 @@ class Bassinet extends Model
         'patient_category',
         'has_hazard',
         'hazard_notes',
-        'status_changed_at'
+        'status_changed_at',
+        'mother_name',
+        'mother_mrn',
+        'occupied_at',
+        'notes'
     ];
 
     protected $casts = [
         'has_hazard' => 'boolean',
-        'status_changed_at' => 'datetime'
+        'status_changed_at' => 'datetime',
+        'occupied_at' => 'datetime'
     ];
 
     public function room(): BelongsTo

@@ -28,7 +28,8 @@ class DashboardController extends Controller
 
         $ward = Ward::find($selectedWardId);
         $rooms = $ward->rooms()->with(['beds' => function($query) {
-            $query->orderBy('bed_number');
+            $query->select('id', 'bed_number', 'room_id', 'status', 'patient_name', 'patient_category', 'gender', 'mrn', 'has_hazard', 'hazard_notes', 'occupied_at', 'notes')
+                  ->orderBy('bed_number');
         }])->orderBy('sequence')->get();
 
         // If it's the nursery ward, redirect to nursery.index
@@ -108,6 +109,9 @@ class DashboardController extends Controller
 
         $recentTransfers = $this->getRecentTransfers();
 
+        // Get all wards for transfer modal
+        $wards = Ward::all();
+
         return view('dashboard', compact(
             'ward',
             'rooms',
@@ -119,7 +123,8 @@ class DashboardController extends Controller
             'todayDischarges',
             'activityLogs',
             'hasMoreLogs',
-            'recentTransfers'
+            'recentTransfers',
+            'wards'
         ));
     }
 

@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<!-- Add Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Add jQuery before the content -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <div class="py-6 bg-secondary">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Flash Message -->
@@ -25,103 +31,103 @@
         </div>
 
         <!-- Main Dashboard Content with Activity Timeline -->
-        <div class="flex flex-col md:flex-row gap-6 mb-8">
-            <!-- Main Dashboard Content -->
-            <div class="w-full md:w-2/3">
-                <!-- Activity Timeline -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b border-gray-200 bg-primary/5">
-                        <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
-                    </div>
-                    <div class="p-4">
-                        @if(count($activityLogs) > 0)
-                        <div class="relative" id="activity-container">
-                            <!-- Activity logs will be loaded here -->
-                            @include('partials.activity-logs', ['activityLogs' => $activityLogs])
-
-                            @if($hasMoreLogs)
-                            <div class="text-center mt-6">
-                                <button id="load-more-btn"
-                                    class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-                                    data-offset="5">
-                                    Load More
-                                </button>
+                <div class="flex flex-col md:flex-row gap-6 mb-8">
+                    <!-- Main Dashboard Content -->
+                    <div class="w-full md:w-2/3">
+                        <!-- Activity Timeline -->
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div class="p-4 border-b border-gray-200 bg-primary/5">
+                                <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
                             </div>
-                            @endif
+                            <div class="p-4">
+                                @if(count($activityLogs) > 0)
+                                <div class="relative" id="activity-container">
+                                    <!-- Activity logs will be loaded here -->
+                                    @include('partials.activity-logs', ['activityLogs' => $activityLogs])
+
+                                    @if($hasMoreLogs)
+                                    <div class="text-center mt-6">
+                                        <button id="load-more-btn"
+                                            class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                                            data-offset="5">
+                                            Load More
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
+                                @else
+                                <div class="text-center py-8 text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <p>No activity logs found.</p>
+                                </div>
+                                @endif
+                            </div>
                         </div>
-                        @else
-                        <div class="text-center py-8 text-gray-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <p>No activity logs found.</p>
-                        </div>
-                        @endif
                     </div>
+
+                    <!-- Legend Section -->
+                            <div class="w-full md:w-1/3 shadow-md overflow-hidden mb-8 md:top-4 md:self-start md:ml-auto">
+                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                    <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center"
+                                        onclick="toggleLegend()">
+                                        <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
+                                        <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div id="legendContent" class="p-4 hidden">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
+                                                        <span class="text-sm">Male</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
+                                                        <span class="text-sm">Female</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
+                                                        <span class="text-sm">Adult</span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
+                                                        <span class="text-sm">Paediatric</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-medium text-gray-700 mb-2">Hazard</h3>
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center">
+                                                        <span class="w-6 h-6 flex items-center justify-center text-red-600 mr-2">
+                                                            ☠️
+                                                        </span>
+                                                        <span class="text-sm">Patient/Bed Hazard</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                 </div>
-            </div>
 
-            <!-- Legend Section -->
-            <div class="w-full md:w-1/3 shadow-md overflow-hidden mb-8 md:top-4 md:self-start md:ml-auto">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b border-gray-200 bg-primary/5 cursor-pointer flex justify-between items-center"
-                        onclick="toggleLegend()">
-                        <h2 class="text-lg font-semibold text-gray-900">Legend</h2>
-                        <svg id="legendToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500"
-                            viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div id="legendContent" class="p-4 hidden">
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Gender</h3>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <span class="w-6 h-6 flex items-center justify-center text-blue-600 font-bold mr-2">♂</span>
-                                        <span class="text-sm">Male</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="w-6 h-6 flex items-center justify-center text-pink-600 font-bold mr-2">♀</span>
-                                        <span class="text-sm">Female</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Patient Category</h3>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👨</span>
-                                        <span class="text-sm">Adult</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
-                                        <span class="text-sm">Paediatric</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Hazard</h3>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <span class="w-6 h-6 flex items-center justify-center text-red-600 mr-2">
-                                            ☠️
-                                        </span>
-                                        <span class="text-sm">Patient/Bed Hazard</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bed Status Summary Cards -->
+                <!-- Bed Status Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="p-3 border-b border-gray-200 bg-gray-50">
@@ -408,107 +414,118 @@
             </div>
 
             <div class="p-6">
-                @if($ward->ward_name === 'Nursery Ward')
-                    <!-- Nursery Room Layout -->
-                    <div class="border rounded-lg overflow-hidden shadow-sm">
+                @if($ward->ward_name === 'Maternity Ward')
+                    <!-- Maternity Ward Layout -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        @foreach($rooms as $room)
+                        <div class="border rounded-lg overflow-hidden shadow-sm" data-room-id="{{ $room->id }}">
                         <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                            <h3 class="font-medium text-gray-700">{{ $ward->rooms->first()->room_name }}</h3>
+                                <h3 class="font-medium text-gray-700">{{ $room->room_name }}</h3>
                             <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                                Capacity: {{ $ward->rooms->first()->capacity }} Cribs
+                                    Capacity: {{ $room->capacity }} Beds + 2 Bassinets
                             </span>
                         </div>
 
+                            @if($room->is_blocked)
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>Room Blocked</strong> - {{ $room->block_remarks }}
+                                            <br>
+                                            <small class="text-red-600">Blocked by {{ $room->blockedByUser->name }} on {{ $room->blocked_at->format('M d, Y h:i A') }}</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
                         <div class="p-4">
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                @foreach($ward->rooms->first()->beds->where('is_crib', true) as $crib)
-                                <a href="{{ route('beds.show', $crib) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
-                                    $crib->status == 'Available' ? 'border-green-300 bg-green-50' :
-                                    ($crib->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' :
-                                    ($crib->status == 'Discharged' ? 'border-blue-300 bg-blue-50' :
-                                    ($crib->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' :
-                                    ($crib->status == 'Transfer-out' ? 'border-orange-300 bg-orange-50' :
-                                    ($crib->status == 'Transfer-in' ? 'border-purple-300 bg-purple-50' :
+                                <!-- Beds Section -->
+                                <div class="mb-6">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Beds</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                        @foreach($room->beds->sortBy('bed_number') as $bed)
+                                        <a href="{{ route('beds.show', $bed) }}" class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
+                                            $bed->status == 'Available' ? 'border-green-300 bg-green-50' :
+                                            ($bed->status == 'Booked' ? 'border-yellow-300 bg-yellow-50' :
+                                            ($bed->status == 'Discharged' ? 'border-blue-300 bg-blue-50' :
+                                            ($bed->status == 'Housekeeping' ? 'border-pink-300 bg-pink-50' :
+                                            ($bed->status == 'Transfer-out' ? 'border-orange-300 bg-orange-50' :
+                                            ($bed->status == 'Transfer-in' ? 'border-purple-300 bg-purple-50' :
                                     'border-red-300 bg-red-50'))))) }}">
                                     <div class="px-3 py-2 border-b {{
-                                        $crib->status == 'Available' ? 'bg-green-100 text-green-800' :
-                                        ($crib->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' :
-                                        ($crib->status == 'Discharged' ? 'bg-blue-100 text-blue-800' :
-                                        ($crib->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' :
-                                        ($crib->status == 'Transfer-out' ? 'bg-orange-100 text-orange-800' :
-                                        ($bed->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
+                                                $bed->status == 'Available' ? 'bg-green-100 text-green-800' :
+                                                ($bed->status == 'Booked' ? 'bg-yellow-100 text-yellow-800' :
+                                                ($bed->status == 'Discharged' ? 'bg-blue-100 text-blue-800' :
+                                                ($bed->status == 'Housekeeping' ? 'bg-pink-100 text-pink-800' :
+                                                ($bed->status == 'Transfer-out' ? 'bg-orange-100 text-orange-800' :
+                                                ($bed->status == 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
                                         'bg-red-100 text-red-800'))))) }}">
                                         <div class="flex justify-between items-center">
-                                            <span class="font-medium">{{ $crib->bed_number }}</span>
+                                                    <span class="font-medium">Bed {{ $bed->bed_number }}</span>
                                             <span class="text-xs px-1.5 py-0.5 rounded-full {{
-                                                $crib->status == 'Available' ? 'bg-green-200 text-green-900' :
-                                                ($crib->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' :
-                                                ($crib->status == 'Discharged' ? 'bg-blue-200 text-blue-900' :
-                                                ($crib->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' :
-                                                ($crib->status == 'Transfer-out' ? 'bg-orange-200 text-orange-900' :
-                                                ($bed->status == 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
+                                                        $bed->status == 'Available' ? 'bg-green-200 text-green-900' :
+                                                        ($bed->status == 'Booked' ? 'bg-yellow-200 text-yellow-900' :
+                                                        ($bed->status == 'Discharged' ? 'bg-blue-200 text-blue-900' :
+                                                        ($bed->status == 'Housekeeping' ? 'bg-pink-200 text-pink-900' :
+                                                        ($bed->status == 'Transfer-out' ? 'bg-orange-200 text-orange-900' :
+                                                        ($bed->status == 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
                                                 'bg-red-200 text-red-900'))))) }}">
-                                                {{ $crib->status }}
+                                                        {{ $bed->status }}
                                             </span>
                                         </div>
                                     </div>
                                     <div class="p-3">
-                                        @if($crib->status != 'Available')
+                                                @if($bed->status != 'Available')
                                             <div class="flex justify-between items-start">
-                                                <p class="text-sm font-medium text-gray-700">{{ $crib->patient_name ?: 'Unknown' }}</p>
-                                                <div class="flex items-center space-x-1">
-                                                    @if($crib->has_hazard)
-                                                    <span class="text-red-600 text-1xl" title="{{ $crib->hazard_notes }}">
-                                                        ☠️
-                                                    </span>
+                                                        <div class="space-y-2">
+                                                            <div class="flex items-center space-x-2">
+                                                                <span class="text-sm font-medium text-gray-700">{{ $bed->patient_name }}</span>
+                                                                @if($bed->gender)
+                                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold text-xs">
+                                                                        {{ $bed->gender == 'Male' ? '♂' : '♀' }}
+                                                        </span>
                                                     @endif
-                                                    @if($crib->status == 'Housekeeping')
+                                                        </div>
+                                                        <div class="flex items-center space-x-2">
+                                                            @if($bed->patient_category)
+                                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                                                    {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
+                                                                </span>
+                                                            @endif
+                                                            @if($bed->has_hazard)
+                                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700" title="{{ $bed->hazard_notes }}">
+                                                                    ☠️
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        @if($bed->occupied_at)
+                                                            <div class="text-sm text-gray-600 italic">
+                                                                Occupied: {{ $bed->occupied_at->format('M d, Y h:i A') }}
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    @if($bed->status == 'Housekeeping')
                                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
                                                         </span>
                                                     @endif
-                                                    @if($crib->gender)
-                                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $crib->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold">
-                                                            {{ $crib->gender == 'Male' ? '♂' : '♀' }}
-                                                        </span>
-                                                    @endif
                                                 </div>
-                                            </div>
-                                            @if($crib->status_changed_at)
-                                                <p class="text-xs text-gray-500 mt-1">
-                                                    @if($crib->status == 'Housekeeping')
-                                                        Started: {{ $crib->housekeeping_started_at->format('M d, h:i A') }}
-                                                        <br>
-                                                        <span class="text-pink-600">
-                                                            @php
-                                                                $minutesRemaining = Carbon\Carbon::now()->diffInMinutes($crib->housekeeping_started_at->addHours(2));
-                                                                $hoursRemaining = floor($minutesRemaining / 60);
-                                                                $minutesLeft = $minutesRemaining % 60;
-
-                                                                if ($minutesRemaining <= 0) {
-                                                                    $timeDisplay = 'Available soon';
-                                                                } elseif ($hoursRemaining > 0) {
-                                                                    $timeDisplay = $hoursRemaining . ' hour' . ($hoursRemaining > 1 ? 's' : '') . ' ' . $minutesLeft . ' minute' . ($minutesLeft > 1 || $minutesLeft == 0 ? 's' : '');
-                                                                } else {
-                                                                    $timeDisplay = $minutesLeft . ' minute' . ($minutesLeft > 1 ? 's' : '');
-                                                                }
-                                                            @endphp
-                                                            Auto-available in {{ $timeDisplay }}
+                                            @else
+                                                <p class="text-sm text-gray-500 italic">
+                                                        No patient
+                                                        @if($bed->has_hazard)
+                                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700 float-right" title="{{ $bed->hazard_notes }}">
+                                                            ☠️
                                                         </span>
-                                                    @else
-                                                        {{ $crib->status == 'Discharged' ? 'Discharged' : 'Since' }}:
-                                                        {{ $crib->status_changed_at->format('M d, h:i A') }}
-                                                    @endif
-                                                </p>
-                                            @endif
-                                        @else
-                                            <p class="text-sm text-gray-500 italic">
-                                                No baby
-                                                @if($crib->has_hazard)
-                                                <span class="text-red-600 float-right text-1xl" title="{{ $crib->hazard_notes }}">
-                                                    ☠️
-                                                </span>
                                                 @endif
                                             </p>
                                         @endif
@@ -517,6 +534,91 @@
                                 @endforeach
                             </div>
                         </div>
+
+                                <!-- Bassinets Section -->
+                                <div class="mt-6 pt-6 border-t">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Bassinets</h4>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        @foreach($room->bassinets as $bassinet)
+                                        <div class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
+                                            $bassinet->status === 'Available' ? 'border-green-300 bg-green-50' :
+                                            ($bassinet->status === 'Occupied' ? 'border-blue-300 bg-blue-50' :
+                                            ($bassinet->status === 'Transfer-out' ? 'border-yellow-300 bg-yellow-50' :
+                                            ($bassinet->status === 'Transfer-in' ? 'border-purple-300 bg-purple-50' :
+                                            'border-gray-300 bg-gray-50')))
+                                        }}">
+                                            <div class="px-3 py-2 border-b {{
+                                                $bassinet->status === 'Available' ? 'bg-green-100 text-green-800' :
+                                                ($bassinet->status === 'Occupied' ? 'bg-blue-100 text-blue-800' :
+                                                ($bassinet->status === 'Transfer-out' ? 'bg-yellow-100 text-yellow-800' :
+                                                ($bassinet->status === 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
+                                                'bg-gray-100 text-gray-800')))
+                                            }}">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="font-medium">Bassinet {{ $bassinet->bassinet_number }}</span>
+                                                    <span class="text-xs px-1.5 py-0.5 rounded-full {{
+                                                        $bassinet->status === 'Available' ? 'bg-green-200 text-green-900' :
+                                                        ($bassinet->status === 'Occupied' ? 'bg-blue-200 text-blue-900' :
+                                                        ($bassinet->status === 'Transfer-out' ? 'bg-yellow-200 text-yellow-900' :
+                                                        ($bassinet->status === 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
+                                                        'bg-gray-200 text-gray-900')))
+                                                    }}">
+                                                        {{ $bassinet->status }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="p-3">
+                                                @if($bassinet->status === 'Occupied')
+                                                    <div class="flex justify-between items-start">
+                                                        <div class="space-y-2">
+                                                            <div class="flex items-center space-x-2">
+                                                                <span class="text-sm font-medium text-gray-700">{{ $bassinet->patient_name }}</span>
+                                                                @if($bassinet->gender)
+                                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bassinet->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold text-xs">
+                                                                        {{ $bassinet->gender == 'Male' ? '♂' : '♀' }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                            <div class="flex items-center space-x-2">
+                                                                <span class="text-sm text-gray-600">Mother: {{ $bassinet->mother_name }}</span>
+                                                                @if($bassinet->mother_mrn)
+                                                                    <span class="text-xs text-gray-500">(MRN: {{ $bassinet->mother_mrn }})</span>
+                                                                @endif
+                                                            </div>
+                                                            @if($bassinet->occupied_at)
+                                                                <p class="text-xs text-gray-500">
+                                                                    Occupied: {{ $bassinet->occupied_at->format('M d, Y h:i A') }}
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" class="transfer-bassinet px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors" 
+                                                                    data-bassinet-id="{{ $bassinet->id }}">
+                                                                Transfer
+                                                            </button>
+                                                            <button type="button" class="discharge-bassinet px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors" 
+                                                                    data-bassinet-id="{{ $bassinet->id }}">
+                                                                Discharge
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="flex justify-between items-center">
+                                                        <p class="text-sm text-gray-500 italic">Available</p>
+                                                        <button type="button" class="register-baby px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors" 
+                                                                data-bassinet-id="{{ $bassinet->id }}">
+                                                            Register Baby
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 @else
                     <!-- Regular Ward Layout -->
@@ -607,89 +709,53 @@
                                             </div>
                                         </div>
                                         <div class="p-3">
-                                            @if($bed->status != 'Available')
-                                                <div class="flex justify-between items-start">
-                                                    <p class="text-sm font-medium text-gray-700">{{ $bed->patient_name ?: 'Unknown' }}</p>
-                                                    <div class="flex items-center space-x-1">
-                                                        @if($bed->has_hazard)
-                                                        <span class="text-red-600 text-1xl" title="{{ $bed->hazard_notes }}">
-                                                            ☠️
-                                                        </span>
+                                            <div class="flex justify-between items-start">
+                                                <div class="space-y-2">
+                                                    @if($bed->status != 'Available')
+                                                        <div class="flex items-center space-x-2">
+                                                            <span class="text-sm font-medium text-gray-700">{{ $bed->patient_name }}</span>
+                                                            @if($bed->gender)
+                                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold text-xs">
+                                                                    {{ $bed->gender == 'Male' ? '♂' : '♀' }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="flex items-center space-x-2">
+                                                            @if($bed->patient_category)
+                                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                                                    {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
+                                                                </span>
+                                                            @endif
+                                                            @if($bed->has_hazard)
+                                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700" title="{{ $bed->hazard_notes }}">
+                                                                    ☠️
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        @if($bed->occupied_at)
+                                                            <div class="text-sm text-gray-600 italic">
+                                                                Occupied: {{ $bed->occupied_at->format('M d, Y h:i A') }}
+                                                            </div>
                                                         @endif
-                                                        @if($bed->status == 'Housekeeping')
-                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                            </span>
-                                                        @endif
-                                                        @if($bed->gender)
-                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold">
-                                                                {{ $bed->gender == 'Male' ? '♂' : '♀' }}
-                                                            </span>
-                                                        @endif
-                                                        @if($bed->patient_category)
-                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
-                                                                {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
-                                                            </span>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @else
-                                                <p class="text-sm text-gray-500 italic">
-                                                    No patient
-                                                    @if($bed->has_hazard)
-                                                    <span class="text-red-600 float-right text-1xl" title="{{ $bed->hazard_notes }}">
-                                                        ☠️
-                                                    </span>
+                                                    @else
+                                                        <p class="text-sm text-gray-500 italic">
+                                                            No patient
+                                                        </p>
                                                     @endif
-                                                </p>
-                                            @endif
+                                                </div>
+                                                @if($bed->status == 'Housekeeping')
+                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </a>
                                     @endforeach
                                 </div>
                             </div>
-
-                            @if($room->ward->ward_name === 'Maternity Ward')
-                                <div class="mt-4">
-                                    <h5 class="font-medium text-gray-700 mb-2">Bassinets</h5>
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                        @foreach($room->bassinets as $bassinet)
-                                            <div class="border rounded-md p-3 {{
-                                                $bassinet->status === 'Available' ? 'bg-green-50 border-green-200' :
-                                                ($bassinet->status === 'Occupied' ? 'bg-blue-50 border-blue-200' :
-                                                ($bassinet->status === 'Transfer-out' ? 'bg-yellow-50 border-yellow-200' :
-                                                ($bassinet->status === 'Transfer-in' ? 'bg-purple-50 border-purple-200' :
-                                                'bg-gray-50 border-gray-200')))
-                                            }}">
-                                                <div class="flex justify-between items-start">
-                                                    <div>
-                                                        <h6 class="font-medium text-gray-900">Bassinet {{ $bassinet->bassinet_number }}</h6>
-                                                        <p class="text-sm text-gray-500">
-                                                            Status: <span class="font-medium">{{ $bassinet->status }}</span>
-                                                        </p>
-                                                        @if($bassinet->patient_name)
-                                                            <p class="text-sm text-gray-700 mt-1">
-                                                                Baby: {{ $bassinet->patient_name }}
-                                                                @if($bassinet->gender)
-                                                                    <span class="ml-1">({{ $bassinet->gender }})</span>
-                                                                @endif
-                                                            </p>
-                                                        @endif
-                                                    </div>
-                                                    @if($bassinet->status === 'Occupied')
-                                                        <button onclick="showTransferModal('{{ $bassinet->id }}')" 
-                                                                class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                                                            Transfer
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                         @endforeach
                     </div>
@@ -721,269 +787,652 @@
             </div>
         </div>
 
-        <!-- Transfer Modal -->
+        <!-- Transfer Modal FOR BABY IN THE BASSINET -->
         <div id="transferModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-[#EFEBCE]">
                 <div class="mt-3">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Transfer Bassinet</h3>
-                    <form id="transferForm" class="mt-4">
-                        @csrf
-                        <div class="mt-2">
-                            <label for="destination_ward" class="block text-sm font-medium text-gray-700">Destination Ward</label>
-                            <select id="destination_ward" name="destination_ward_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Transfer Baby</h3>
+                        <button onclick="hideTransferModal()" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form id="transferForm" class="mt-4 space-y-4">
+                        <input type="hidden" id="transferBassinetId" name="bassinet_id">
+                        <div class="space-y-2">
+                            <label for="destinationWard" class="block text-sm font-medium text-gray-700">Destination Ward</label>
+                            <select id="destinationWard" name="destination_ward_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                    required>
+                                <option value="">Select Ward</option>
                                 @foreach($wards as $ward)
-                                    @if($ward->id !== $room->ward_id)
+                                    @if($ward->ward_name === 'Nursery Ward' || $ward->ward_name === 'Nursery')
                                         <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
                                     @endif
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mt-2">
-                            <label for="destination_room" class="block text-sm font-medium text-gray-700">Destination Room</label>
-                            <select id="destination_room" name="destination_room_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-                                <!-- Rooms will be loaded dynamically -->
+                        
+                        <div class="space-y-2">
+                            <label for="destinationRoom" class="block text-sm font-medium text-gray-700">Destination Room</label>
+                            <select id="destinationRoom" name="destination_room_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                    required>
+                                <option value="">Select Room</option>
                             </select>
                         </div>
-                        <div class="mt-4 flex justify-end space-x-2">
-                            <button type="button" onclick="hideTransferModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        
+                        <div class="space-y-2">
+                            <label for="destinationCrib" class="block text-sm font-medium text-gray-700">Available Cribs</label>
+                            <select id="destinationCrib" name="destination_crib_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                    required>
+                                <option value="">Select Crib</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button type="button" onclick="hideTransferModal()" 
+                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                Transfer
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-[#BB8858] text-white rounded-md hover:bg-[#D8A48F] transition-colors">
+                                Transfer Baby
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<script>
-    function toggleLegend() {
-        const legendContent = document.getElementById('legendContent');
-        const legendToggleIcon = document.getElementById('legendToggleIcon');
+        <!-- Register Baby Modal -->
+        <div id="registerBabyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-[#EFEBCE]">
+                <div class="mt-3">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Register New Baby</h3>
+                        <button onclick="hideRegisterBabyModal()" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form id="registerBabyForm" class="mt-4 space-y-4">
+                        @csrf
+                        <div class="space-y-2">
+                            <label for="baby_name" class="block text-sm font-medium text-gray-700">Baby's Name</label>
+                            <input type="text" id="baby_name" name="baby_name" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                   placeholder="Enter baby's name" required>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="baby_gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                            <select id="baby_gender" name="baby_gender" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                    required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
 
-        if (legendContent.classList.contains('hidden')) {
-            legendContent.classList.remove('hidden');
-            legendToggleIcon.innerHTML = `
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            `;
-        } else {
-            legendContent.classList.add('hidden');
-            legendToggleIcon.innerHTML = `
-                <path fill-rule="evenodd" d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            `;
-        }
-    }
+                        <div class="space-y-2">
+                            <label for="baby_mrn" class="block text-sm font-medium text-gray-700">Baby's MRN</label>
+                            <input type="text" id="baby_mrn" name="baby_mrn" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                   placeholder="Enter baby's MRN" required>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="mother_name" class="block text-sm font-medium text-gray-700">Mother's Name</label>
+                            <input type="text" id="mother_name" name="mother_name" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                   placeholder="Enter mother's name" required>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="mother_mrn" class="block text-sm font-medium text-gray-700">Mother's MRN</label>
+                            <input type="text" id="mother_mrn" name="mother_mrn" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                   placeholder="Enter mother's MRN" required>
+                        </div>
 
-    function showBlockRoomModal(roomId) {
-        const modal = document.getElementById('blockRoomModal');
-        const form = document.getElementById('blockRoomForm');
-        form.action = `/BedTrack/public/rooms/${roomId}/block`;
-        modal.classList.remove('hidden');
-        // Clear any previous input
-        document.getElementById('block_remarks').value = '';
-    }
+                        <div class="space-y-2">
+                            <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                            <textarea id="notes" name="notes" rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BB8858] focus:border-[#BB8858]"
+                                      placeholder="Enter any additional notes"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button type="button" onclick="hideRegisterBabyModal()" 
+                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-[#BB8858] text-white rounded-md hover:bg-[#D8A48F] transition-colors">
+                                Register Baby
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-    function hideBlockRoomModal() {
-        const modal = document.getElementById('blockRoomModal');
-        modal.classList.add('hidden');
-    }
+        <!-- Discharge Confirmation Modal -->
+        <div id="dischargeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-[#EFEBCE]">
+                <div class="mt-3">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Confirm Discharge</h3>
+                        <button onclick="hideDischargeModal()" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-gray-700">Are you sure you want to discharge this baby?</p>
+                        <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button onclick="hideDischargeModal()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                            Cancel
+                        </button>
+                        <button onclick="confirmDischarge()" 
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                            Discharge Baby
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // Close modal when clicking outside
-    document.getElementById('blockRoomModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            hideBlockRoomModal();
-        }
-    });
+        <script>
+            function toggleLegend() {
+                const legendContent = document.getElementById('legendContent');
+                const legendToggleIcon = document.getElementById('legendToggleIcon');
 
-    // Handle form submission
-    document.getElementById('blockRoomForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const form = this;
-        const formData = new FormData(form);
-        const blockRemarks = document.getElementById('block_remarks').value.trim();
-        
-        if (!blockRemarks) {
-            alert('Please enter a reason for blocking the room.');
-            return;
-        }
-
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Room not found');
+                if (legendContent.classList.contains('hidden')) {
+                    legendContent.classList.remove('hidden');
+                    legendToggleIcon.innerHTML = `
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                `;
+                } else {
+                    legendContent.classList.add('hidden');
+                    legendToggleIcon.innerHTML = `
+                        <path fill-rule="evenodd" d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                `;
                 }
-                return response.json().then(data => {
-                    throw new Error(data.error || 'Failed to block room');
-                });
             }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.error || 'Failed to block room');
+
+            function showBlockRoomModal(roomId) {
+                const modal = document.getElementById('blockRoomModal');
+                const form = document.getElementById('blockRoomForm');
+                form.action = `/BedTrack/public/rooms/${roomId}/block`;
+                modal.classList.remove('hidden');
+                // Clear any previous input
+                document.getElementById('block_remarks').value = '';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert(error.message || 'Failed to block room. Please try again.');
-        });
-    });
 
-    // Load more activity logs
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', function() {
-                const offset = parseInt(this.getAttribute('data-offset'));
-                const limit = 5; // Number of logs to load each time
+            function hideBlockRoomModal() {
+                const modal = document.getElementById('blockRoomModal');
+                modal.classList.add('hidden');
+            }
 
-                // Show loading state
-                this.innerHTML = 'Loading...';
-                this.disabled = true;
+            // Close modal when clicking outside
+            document.getElementById('blockRoomModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideBlockRoomModal();
+                }
+            });
 
-                // Make AJAX request to load more logs
-                fetch(`/activity-logs/load-more?offset=${offset}&limit=${limit}`, {
+            // Handle form submission
+            document.getElementById('blockRoomForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const form = this;
+                const formData = new FormData(form);
+                const blockRemarks = document.getElementById('block_remarks').value.trim();
+                
+                if (!blockRemarks) {
+                    alert('Please enter a reason for blocking the room.');
+                    return;
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error('Room not found');
+                        }
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Failed to block room');
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    // Append new logs to the container
-                    const activityContainer = document.getElementById('activity-container');
-                    activityContainer.insertAdjacentHTML('beforeend', data.html);
-
-                    // Update button state
-                    this.innerHTML = 'Load More';
-                    this.disabled = false;
-
-                    // Update offset for next request
-                    this.setAttribute('data-offset', offset + limit);
-
-                    // Hide button if no more logs
-                    if (!data.hasMore) {
-                        this.style.display = 'none';
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'Failed to block room');
                     }
                 })
                 .catch(error => {
-                    console.error('Error loading more logs:', error);
-                    this.innerHTML = 'Error loading more logs. Try again.';
-                    this.disabled = false;
+                    console.error('Error:', error);
+                    alert(error.message || 'Failed to block room. Please try again.');
                 });
             });
-        }
-    });
 
-    @if(auth()->user()->role === 'superadmin')
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const roomContainer = document.querySelector('.grid');
-            if (roomContainer) {
-                new Sortable(roomContainer, {
-                    animation: 150,
-                    handle: '.cursor-move',
-                    onEnd: function(evt) {
-                        const roomIds = Array.from(roomContainer.children).map((item, index) => ({
-                            id: item.dataset.roomId,
-                            sequence: index
-                        }));
-                        
-                        fetch('{{ route("super-admin.update-room-sequence") }}', {
-                            method: 'POST',
+            // Load more activity logs
+            document.addEventListener('DOMContentLoaded', function() {
+                const loadMoreBtn = document.getElementById('load-more-btn');
+                if (loadMoreBtn) {
+                    loadMoreBtn.addEventListener('click', function() {
+                        const offset = parseInt(this.getAttribute('data-offset'));
+                        const limit = 5; // Number of logs to load each time
+
+                        // Show loading state
+                        this.innerHTML = 'Loading...';
+                        this.disabled = true;
+
+                        // Make AJAX request to load more logs
+                        fetch(`/BedTrack/public/activity-logs/load-more?offset=${offset}&limit=${limit}`, {
                             headers: {
-                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({ rooms: roomIds })
+                            }
                         })
                         .then(response => response.json())
                         .then(data => {
-                            if (data.success) {
-                                // Show success message
-                                const successMessage = document.createElement('div');
-                                successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
-                                successMessage.textContent = 'Room order updated successfully';
-                                document.body.appendChild(successMessage);
-                                setTimeout(() => successMessage.remove(), 3000);
+                            // Append new logs to the container
+                            const activityContainer = document.getElementById('activity-container');
+                            activityContainer.insertAdjacentHTML('beforeend', data.html);
+
+                            // Update button state
+                            this.innerHTML = 'Load More';
+                            this.disabled = false;
+
+                            // Update offset for next request
+                            this.setAttribute('data-offset', offset + limit);
+
+                            // Hide button if no more logs
+                            if (!data.hasMore) {
+                                this.style.display = 'none';
                             }
                         })
                         .catch(error => {
-                            console.error('Error:', error);
-                            // Show error message
-                            const errorMessage = document.createElement('div');
-                            errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
-                            errorMessage.textContent = 'Failed to update room order';
-                            document.body.appendChild(errorMessage);
-                            setTimeout(() => errorMessage.remove(), 3000);
+                            console.error('Error loading more logs:', error);
+                            this.innerHTML = 'Error loading more logs. Try again.';
+                            this.disabled = false;
+                        });
+                    });
+                }
+            });
+
+            @if(auth()->user()->role === 'superadmin')
+            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const roomContainer = document.querySelector('.grid');
+                    if (roomContainer) {
+                        new Sortable(roomContainer, {
+                            animation: 150,
+                            handle: '.cursor-move',
+                            onEnd: function(evt) {
+                                const roomIds = Array.from(roomContainer.children).map((item, index) => ({
+                                    id: item.dataset.roomId,
+                                    sequence: index
+                                }));
+                                
+                                fetch('{{ route("super-admin.update-room-sequence") }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                    },
+                                    body: JSON.stringify({ rooms: roomIds })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // Show success message
+                                        const successMessage = document.createElement('div');
+                                        successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
+                                        successMessage.textContent = 'Room order updated successfully';
+                                        document.body.appendChild(successMessage);
+                                        setTimeout(() => successMessage.remove(), 3000);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    // Show error message
+                                    const errorMessage = document.createElement('div');
+                                    errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
+                                    errorMessage.textContent = 'Failed to update room order';
+                                    document.body.appendChild(errorMessage);
+                                    setTimeout(() => errorMessage.remove(), 3000);
+                                });
+                            }
                         });
                     }
                 });
-            }
-        });
-    </script>
-    @endif
+            </script>
+            @endif
 
-    // Transfer modal functions
-    function showTransferModal(bassinetId) {
-        $('#transferModal').removeClass('hidden');
-        $('#transferForm').data('bassinet-id', bassinetId);
-    }
-
-    function hideTransferModal() {
-        $('#transferModal').addClass('hidden');
-    }
-
-    // Load rooms when ward is selected
-    $('#destination_ward').on('change', function() {
-        const wardId = $(this).val();
-        $.get(`/wards/${wardId}/rooms`, function(rooms) {
-            const roomSelect = $('#destination_room');
-            roomSelect.empty();
-            rooms.forEach(room => {
-                roomSelect.append(`<option value="${room.id}">${room.room_name}</option>`);
+            // Handle transfer button click
+            $(document).on('click', '.transfer-bassinet', function(e) {
+                e.preventDefault();
+                const bassinetId = $(this).data('bassinet-id');
+                $('#transferBassinetId').val(bassinetId);
+                
+                // Reset the form
+                $('#destinationWard').val('');
+                $('#destinationRoom').empty().append('<option value="">Select Room</option>');
+                $('#destinationCrib').empty().append('<option value="">Select Crib</option>');
+                
+                // Show the modal
+                showTransferModal();
             });
-        });
-    });
 
-    // Handle transfer form submission
-    $('#transferForm').on('submit', function(e) {
-        e.preventDefault();
-        const bassinetId = $(this).data('bassinet-id');
-        const formData = $(this).serialize();
-
-        $.ajax({
-            url: `/bassinets/${bassinetId}/transfer`,
-            method: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    location.reload();
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function(xhr) {
-                alert(xhr.responseJSON.message || 'Failed to transfer bassinet');
+            function showTransferModal() {
+                const modal = document.getElementById('transferModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                }, 10);
             }
-        });
-    });
-</script>
+
+            function hideTransferModal() {
+                const modal = document.getElementById('transferModal');
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            // Load rooms when ward is selected
+            $('#destinationWard').change(function() {
+                const wardId = $(this).val();
+                const roomSelect = $('#destinationRoom');
+                const cribSelect = $('#destinationCrib');
+                
+                // Clear room and crib selections
+                roomSelect.empty().append('<option value="">Select Room</option>');
+                cribSelect.empty().append('<option value="">Select Crib</option>');
+                
+                if (wardId) {
+                    console.log('Loading rooms for ward:', wardId);
+                    // Fetch rooms for the selected ward
+                    $.ajax({
+                        url: `/BedTrack/public/api/wards/${wardId}/rooms`,
+                        type: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(rooms) {
+                            console.log('Rooms loaded:', rooms);
+                            roomSelect.empty().append('<option value="">Select Room</option>');
+                            if (rooms.length === 0) {
+                                roomSelect.append('<option value="" disabled>No rooms available</option>');
+                            } else {
+                                rooms.forEach(room => {
+                                    roomSelect.append(`<option value="${room.id}">${room.room_name}</option>`);
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error loading rooms:', xhr);
+                            showAlert('error', 'Failed to load rooms: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                        }
+                    });
+                }
+            });
+
+            // Load cribs when room is selected
+            $('#destinationRoom').change(function() {
+                const roomId = $(this).val();
+                const cribSelect = $('#destinationCrib');
+                
+                // Clear crib selection
+                cribSelect.empty().append('<option value="">Select Crib</option>');
+                
+                if (roomId) {
+                    console.log('Loading cribs for room:', roomId);
+                    // Fetch available cribs for the selected room
+                    $.ajax({
+                        url: `/BedTrack/public/api/rooms/${roomId}/available-cribs`,
+                        type: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(cribs) {
+                            console.log('Cribs loaded:', cribs);
+                            cribSelect.empty().append('<option value="">Select Crib</option>');
+                            if (cribs.length === 0) {
+                                cribSelect.append('<option value="" disabled>No available cribs</option>');
+                            } else {
+                                cribs.forEach(crib => {
+                                    cribSelect.append(`<option value="${crib.id}">${crib.bed_number}</option>`);
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error loading cribs:', xhr);
+                            showAlert('error', 'Failed to load cribs: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                        }
+                    });
+                }
+            });
+
+            // Handle transfer form submission
+            $('#transferForm').submit(function(e) {
+                e.preventDefault();
+                
+                const bassinetId = $('#transferBassinetId').val();
+                const formData = new FormData(this);
+                
+                $.ajax({
+                    url: `/BedTrack/public/bassinets/${bassinetId}/transfer`,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            hideTransferModal();
+                            showAlert('success', response.message);
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showAlert('error', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Transfer error:', xhr);
+                        showAlert('error', xhr.responseJSON?.message || 'Failed to transfer baby');
+                    }
+                });
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('transferModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideTransferModal();
+                }
+            });
+
+            // Handle register baby button click
+            $(document).on('click', '.register-baby', function(e) {
+                e.preventDefault();
+                const bassinetId = $(this).data('bassinet-id');
+                $('#registerBabyForm').data('bassinet-id', bassinetId);
+                
+                // Reset the form
+                $('#registerBabyForm')[0].reset();
+                
+                // Show the modal
+                showRegisterBabyModal();
+            });
+
+            function showRegisterBabyModal() {
+                const modal = document.getElementById('registerBabyModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                }, 10);
+            }
+
+            function hideRegisterBabyModal() {
+                const modal = document.getElementById('registerBabyModal');
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            // Handle register baby form submission
+            $('#registerBabyForm').submit(function(e) {
+                e.preventDefault();
+                
+                const bassinetId = $(this).data('bassinet-id');
+                const formData = new FormData(this);
+                
+                $.ajax({
+                    url: `/BedTrack/public/bassinets/${bassinetId}/register`,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            hideRegisterBabyModal();
+                            showAlert('success', response.message);
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showAlert('error', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Registration error:', xhr);
+                        showAlert('error', xhr.responseJSON?.message || 'Failed to register baby');
+                    }
+                });
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('registerBabyModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideRegisterBabyModal();
+                }
+            });
+
+            function showAlert(type, message) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg ${
+                    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                } text-white`;
+                alertDiv.textContent = message;
+                document.body.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 3000);
+            }
+
+            // Discharge modal functions
+            let currentBassinetId = null;
+
+            function showDischargeModal(bassinetId) {
+                currentBassinetId = bassinetId;
+                const modal = document.getElementById('dischargeModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                }, 10);
+            }
+
+            function hideDischargeModal() {
+                const modal = document.getElementById('dischargeModal');
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    currentBassinetId = null;
+                }, 300);
+            }
+
+            function confirmDischarge() {
+                if (!currentBassinetId) return;
+
+                $.ajax({
+                    url: `/BedTrack/public/bassinets/${currentBassinetId}/discharge`,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            hideDischargeModal();
+                            showAlert('success', response.message);
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showAlert('error', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Discharge error:', xhr);
+                        showAlert('error', xhr.responseJSON?.message || 'Failed to discharge baby');
+                    }
+                });
+            }
+
+            // Handle discharge bassinet button click
+            $(document).on('click', '.discharge-bassinet', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const bassinetId = $(this).data('bassinet-id');
+                showDischargeModal(bassinetId);
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('dischargeModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideDischargeModal();
+                }
+            });
+
+            // Remove any duplicate event handlers
+            $(document).off('click', '.discharge-bassinet');
+            $(document).on('click', '.discharge-bassinet', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const bassinetId = $(this).data('bassinet-id');
+                showDischargeModal(bassinetId);
+            });
+        </script>
 @endsection
 
