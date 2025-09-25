@@ -117,12 +117,12 @@
                                                     @csrf
                                                     <input type="hidden" name="ward_id" value="{{ $ward->id }}">
                                                     <div class="flex flex-col md:flex-row gap-4">
-                                                        <div class="md:w-1/3">
+                                                        <div class="md:w-1/4">
                                                             <label for="room_name_{{ $ward->id }}" class="block text-xs font-medium text-gray-500 mb-1">Room Name</label>
                                                             <input type="text" name="room_name" id="room_name_{{ $ward->id }}" required
                                                                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-2 px-3">
                                                         </div>
-                                                        <div class="md:w-1/3">
+                                                        <div class="md:w-1/4">
                                                             <label for="room_type_{{ $ward->id }}" class="block text-xs font-medium text-gray-500 mb-1">Room Type</label>
                                                             <select name="room_type" id="room_type_{{ $ward->id }}" required
                                                                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-2 px-3">
@@ -130,7 +130,12 @@
                                                                 <option value="nursery">Nursery</option>
                                                             </select>
                                                         </div>
-                                                        <div class="md:w-1/3 flex items-end">
+                                                        <div class="md:w-1/4">
+                                                            <label for="capacity_{{ $ward->id }}" class="block text-xs font-medium text-gray-500 mb-1">Capacity</label>
+                                                            <input type="number" name="capacity" id="capacity_{{ $ward->id }}" value="1" min="1" max="20" required
+                                                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-2 px-3">
+                                                        </div>
+                                                        <div class="md:w-1/4 flex items-end">
                                                             <button type="submit" class="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-500 transition-colors text-sm">
                                                                 Add Room
                                                             </button>
@@ -191,13 +196,24 @@
                                                                                     <div class="border rounded-lg p-3">
                                                                                         <div class="flex justify-between items-center mb-2">
                                                                                             <span class="text-sm font-medium text-gray-700">Bed {{ $bed->bed_number }}</span>
-                                                                                            <span class="px-2 py-1 text-xs rounded-full 
-                                                                                                @if($bed->status === 'Available') bg-green-100 text-green-800
-                                                                                                @elseif($bed->status === 'Occupied') bg-blue-100 text-blue-800
-                                                                                                @elseif($bed->status === 'Maintenance') bg-yellow-100 text-yellow-800
-                                                                                                @else bg-gray-100 text-gray-800 @endif">
-                                                                                                {{ $bed->status }}
-                                                                                            </span>
+                                                                                            <div class="flex items-center space-x-2">
+                                                                                                <span class="px-2 py-1 text-xs rounded-full 
+                                                                                                    @if($bed->status === 'Available') bg-green-100 text-green-800
+                                                                                                    @elseif($bed->status === 'Occupied') bg-blue-100 text-blue-800
+                                                                                                    @elseif($bed->status === 'Maintenance') bg-yellow-100 text-yellow-800
+                                                                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                                                                    {{ $bed->status }}
+                                                                                                </span>
+                                                                                                <form action="{{ route('super-admin.delete-bed', $bed) }}" method="POST" class="inline">
+                                                                                                    @csrf
+                                                                                                    @method('DELETE')
+                                                                                                    <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('Are you sure you want to delete this bed?')">
+                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                                                                        </svg>
+                                                                                                    </button>
+                                                                                                </form>
+                                                                                            </div>
                                                                                         </div>
                                                                                         <div class="text-xs text-gray-500">
                                                                                             Type: {{ ucfirst($bed->bed_type) }}
@@ -409,7 +425,24 @@
 
     // Restore expanded states on page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Restore ward expanded states
+        // Check for flash session data first (from redirects after form submissions)
+        @if (session('expanded_ward'))
+            const wardId = 'ward-{{ session('expanded_ward') }}';
+            const wardElement = document.getElementById(wardId);
+            if (wardElement) {
+                wardElement.classList.remove('hidden');
+            }
+        @endif
+
+        @if (session('expanded_room'))
+            const roomId = 'room-{{ session('expanded_room') }}';
+            const roomElement = document.getElementById(roomId);
+            if (roomElement) {
+                roomElement.classList.remove('hidden');
+            }
+        @endif
+
+        // Restore ward expanded states from sessionStorage
         document.querySelectorAll('[id^="ward-"]').forEach(element => {
             const isExpanded = sessionStorage.getItem(element.id) === 'true';
             if (isExpanded) {
@@ -417,7 +450,7 @@
             }
         });
 
-        // Restore room expanded states
+        // Restore room expanded states from sessionStorage
         document.querySelectorAll('[id^="room-"]').forEach(element => {
             const isExpanded = sessionStorage.getItem(element.id) === 'true';
             if (isExpanded) {

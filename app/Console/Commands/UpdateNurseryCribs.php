@@ -34,11 +34,11 @@ class UpdateNurseryCribs extends Command
             $nurseryRoom = Room::create([
                 'ward_id' => $nurseryWard->id,
                 'room_name' => 'Nursery Room',
-                'capacity' => 20, // Default capacity
+                'capacity' => 9, // Default capacity
             ]);
 
             // Create initial cribs
-            for ($i = 1; $i <= 20; $i++) {
+            for ($i = 1; $i <= 9; $i++) {
                 Bed::create([
                     'bed_number' => 'Crib ' . $i,
                     'room_id' => $nurseryRoom->id,
@@ -46,7 +46,7 @@ class UpdateNurseryCribs extends Command
                     'is_crib' => true,
                 ]);
             }
-            $this->info('Created Nursery Room with 20 cribs.');
+            $this->info('Created Nursery Room with 9 cribs.');
         }
 
         // Update all beds in the nursery room to be cribs

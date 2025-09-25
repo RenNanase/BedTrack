@@ -13,9 +13,14 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\BassinetController;
+use App\Http\Controllers\EmergencyDashboardController;
+use App\Http\Controllers\WardCensusController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 use Pusher\Pusher;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -42,6 +47,10 @@ Route::middleware(['auth', 'ward.selection'])->group(function () {
     Route::put('/beds/{bed}/status', [BedController::class, 'updateStatus'])->name('beds.update-status');
     Route::get('/beds/{bed}/patient/edit', [BedController::class, 'editPatient'])->name('beds.edit-patient');
     Route::put('/beds/{bed}/patient', [BedController::class, 'updatePatient'])->name('beds.update-patient');
+
+    // New routes for transferring between nursery cribs and maternity bassinets
+    Route::get('/available-bassinets', [BedController::class, 'getAvailableBassinets'])->name('beds.available-bassinets');
+    Route::post('/beds/{bed}/transfer-to-maternity', [BedController::class, 'transferToMaternity'])->name('beds.transfer-to-maternity');
 
     // Room blocking routes
     Route::post('/rooms/{room}/block', [WardController::class, 'blockRoom'])->name('rooms.block');
@@ -75,7 +84,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/super-admin/bassinets', [BassinetController::class, 'store'])->name('super-admin.add-bassinet');
     Route::delete('/super-admin/bassinets/{bassinet}', [BassinetController::class, 'destroy'])->name('super-admin.delete-bassinet');
     Route::get('/activity-logs/load-more', [App\Http\Controllers\ActivityLogController::class, 'loadMore'])->name('activity-logs.load-more');
-    Route::get('/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
 });
 
 // Register Admin Middleware in App\Providers\AppServiceProvider.php boot() method with:
@@ -100,6 +108,32 @@ Route::get('/wards/{ward}/rooms', function (App\Models\Ward $ward) {
     }
 })->name('ward.rooms');
 
+// Route to get available bassinets for a ward
+Route::get('/wards/{ward}/bassinets', function (App\Models\Ward $ward) {
+    try {
+        Log::info('Fetching available bassinets for ward: ' . $ward->id);
+        $bassinets = App\Models\Bassinet::whereHas('room', function($query) use ($ward) {
+                $query->where('ward_id', $ward->id)
+                      ->where('is_blocked', false);
+            })
+            ->where('status', 'Available')
+            ->with('room')
+            ->get()
+            ->map(function($bassinet) {
+                return [
+                    'id' => $bassinet->id,
+                    'bassinet_number' => $bassinet->bassinet_number,
+                    'room_name' => $bassinet->room->room_name
+                ];
+            });
+        Log::info('Found available bassinets: ' . $bassinets->count());
+        return response()->json($bassinets);
+    } catch (\Exception $e) {
+        Log::error('Error fetching bassinets for ward: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to load bassinets: ' . $e->getMessage()], 500);
+    }
+})->name('ward.bassinets');
+
 Route::get('/rooms/{room}/available-beds', function (App\Models\Room $room) {
     try {
         Log::info('Fetching available beds for room: ' . $room->id);
@@ -121,6 +155,36 @@ Route::get('/rooms/{room}/available-beds', function (App\Models\Room $room) {
     }
 })->name('room.available-beds');
 
+// Add route for getting all beds in a room (including name field)
+Route::get('/rooms/{room}/beds', function (App\Models\Room $room) {
+    try {
+        Log::info('Fetching all beds for room: ' . $room->id);
+        $beds = $room->beds()
+            ->where('status', 'Available')
+            ->whereHas('room', function($query) {
+                $query->where('is_blocked', false);
+            })
+            ->whereHas('room.ward', function($query) {
+                $query->where('is_blocked', false);
+            })
+            ->select('id', 'bed_number', 'bed_type', 'is_crib')
+            ->get()
+            ->map(function($bed) {
+                return [
+                    'id' => $bed->id,
+                    'name' => $bed->bed_number,
+                    'is_crib' => $bed->is_crib,
+                    'bed_type' => $bed->bed_type
+                ];
+            });
+        Log::info('Found beds: ' . $beds->count());
+        return response()->json($beds);
+    } catch (\Exception $e) {
+        Log::error('Error fetching beds for room: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to load beds'], 500);
+    }
+})->name('room.beds');
+
 Route::get('/rooms/{room}/transfer-out-beds', function (App\Models\Room $room) {
     try {
         Log::info('Fetching transfer-out beds for room: ' . $room->id);
@@ -141,6 +205,27 @@ Route::get('/rooms/{room}/transfer-out-beds', function (App\Models\Room $room) {
         return response()->json(['error' => 'Failed to load beds'], 500);
     }
 })->name('room.transfer-out-beds');
+
+// Route to get available bassinets for a specific room
+Route::get('/rooms/{room}/bassinets', function (App\Models\Room $room) {
+    try {
+        Log::info('Fetching available bassinets for room: ' . $room->id);
+        $bassinets = App\Models\Bassinet::where('room_id', $room->id)
+            ->where('status', 'Available')
+            ->get()
+            ->map(function($bassinet) {
+                return [
+                    'id' => $bassinet->id,
+                    'bassinet_number' => $bassinet->bassinet_number
+                ];
+            });
+        Log::info('Found available bassinets for room: ' . $bassinets->count());
+        return response()->json($bassinets);
+    } catch (\Exception $e) {
+        Log::error('Error fetching bassinets for room: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to load bassinets: ' . $e->getMessage()], 500);
+    }
+})->name('room.bassinets');
 
 Route::get('/transfers', [TransferController::class, 'index'])->name('transfers.index');
 
@@ -201,3 +286,51 @@ Route::get('/debug-pusher', function () {
 
 // Room sequence management
 Route::post('/rooms/update-sequence', [WardController::class, 'updateRoomSequence'])->name('super-admin.update-room-sequence');
+
+// Emergency Department Dashboard Routes - No ward selection required
+Route::middleware(['auth'])->group(function () {
+    Route::get('/emergency/dashboard', [EmergencyDashboardController::class, 'index'])->name('emergency.dashboard');
+    Route::post('/emergency/dashboard/filter', [EmergencyDashboardController::class, 'filter'])->name('emergency.dashboard.filter');
+    
+    // Add the ward-details route
+    Route::get('/emergency/ward-details/{ward}', [EmergencyDashboardController::class, 'getWardDetails'])->name('emergency.ward-details');
+    
+    // Simple direct routes for emergency ward management
+    Route::get('/emergency/get-rooms/{wardId}', function($wardId) {
+        try {
+            $rooms = \App\Models\Room::where('ward_id', $wardId)
+                ->where('is_blocked', false)
+                ->select('id', 'room_name')
+                ->orderBy('sequence')
+                ->get();
+            return response()->json($rooms);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error fetching rooms: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    })->name('emergency.get-rooms');
+    
+    Route::get('/emergency/get-beds/{roomId}', function($roomId) {
+        try {
+            $beds = \App\Models\Bed::where('room_id', $roomId)
+                ->where('status', 'Available')
+                ->select('id', 'bed_number')
+                ->orderBy('bed_number')
+                ->get();
+            return response()->json($beds);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error fetching beds: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    })->name('emergency.get-beds');
+});
+
+// Nurse Manager Routes
+// Route::middleware(['auth', 'role:nurse-manager'])->name('nurse-manager.')->group(function() {
+//     Route::get('/nurse-manager/dashboard', [NurseManagerController::class, 'dashboard'])->name('dashboard');
+//     // Remove all census-related routes as they're now handled by WardCensusController
+// });
+
+// Ward Census Routes
+Route::resource('census', WardCensusController::class)->middleware(['auth']);
+Route::get('census/dashboard', [WardCensusController::class, 'dashboard'])->name('census.dashboard')->middleware(['auth']);

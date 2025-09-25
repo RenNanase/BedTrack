@@ -81,21 +81,21 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:users,name',
             'password' => 'required|string|min:6|confirmed',
-            'ward_id' => 'nullable|exists:wards,id',
-            'role' => 'required|in:admin,staff,superadmin',
+            'ward_ids' => 'nullable|array',
+            'ward_ids.*' => 'exists:wards,id',
+            'role' => 'required|in:admin,staff,superadmin,emergency',
         ]);
 
         // Create the user
         $user = User::create([
             'name' => $request->name,
             'password' => Hash::make($request->password),
-            'ward_id' => $request->ward_id,
             'role' => $request->role,
         ]);
 
-        // If ward_id is provided, attach the user to the ward
-        if ($request->ward_id) {
-            $user->wards()->attach($request->ward_id);
+        // If ward_ids are provided, attach the user to multiple wards
+        if ($request->filled('ward_ids')) {
+            $user->wards()->attach($request->ward_ids);
         }
 
         return redirect()->route('users.index')
@@ -131,20 +131,20 @@ class UserController extends Controller
         $this->checkSuperAdmin();
         $request->validate([
             'name' => 'required|string|max:255|unique:users,name,' . $user->id,
-            'ward_id' => 'nullable|exists:wards,id',
-            'role' => 'required|in:admin,staff,superadmin',
+            'ward_ids' => 'nullable|array',
+            'ward_ids.*' => 'exists:wards,id',
+            'role' => 'required|in:admin,staff,superadmin,emergency',
         ]);
 
         // Update basic user information
         $user->update([
             'name' => $request->name,
             'role' => $request->role,
-            'ward_id' => $request->ward_id, // Update the main ward_id as well
         ]);
 
-        // Sync ward assignment for all users
-        if ($request->ward_id) {
-            $user->wards()->sync([$request->ward_id]);
+        // Sync ward assignments
+        if ($request->filled('ward_ids')) {
+            $user->wards()->sync($request->ward_ids);
         } else {
             $user->wards()->detach();
         }

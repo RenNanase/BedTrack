@@ -17,7 +17,7 @@
             </div>
             <div class="flex space-x-3">
                 @if(auth()->user()->role === 'admin' || auth()->user()->role === 'superadmin')
-                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-accent/90 transition-colors">
+                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-[#92ada4] text-white rounded-md hover:bg-[#daa38f] transition-colors">
                     Admin Dashboard
                 </a>
                 @endif

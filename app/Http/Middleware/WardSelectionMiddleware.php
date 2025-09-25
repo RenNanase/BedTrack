@@ -16,8 +16,8 @@ class WardSelectionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip ward selection for superadmin and admin users
-        if (Auth::check() && in_array(Auth::user()->role, ['superadmin', 'admin'])) {
+        // Skip ward selection for superadmin, admin, and emergency users
+        if (Auth::check() && in_array(Auth::user()->role, ['superadmin', 'admin', 'emergency'])) {
             return $next($request);
         }
 

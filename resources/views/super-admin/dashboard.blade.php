@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="space-y-4">
-                    <p class="text-gray-600">Manage system users, their roles, and ward assignments.</p>
+                    <p class="text-gray-600">Create new users, edit existing users, and assign them to a ward.</p>
                 </div>
             </div>
 
@@ -50,28 +50,35 @@
                     </a>
                 </div>
                 <div class="space-y-4">
-                    <p class="text-gray-600">Manage hospital wards and their configurations.</p>
-                    <a href="{{ route('super-admin.ward-management') }}" class="block text-primary hover:text-primary/80">
-                        View All Wards →
-                    </a>
+                    <p class="text-gray-600">Create new wards, edit existing wards, and assign beds to them.</p>
                 </div>
             </div>
 
-            <!-- Bed Management Card -->
-            {{-- <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Bed Management Card
+            <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-semibold text-gray-800">Bed Management</h2>
-                    <a href="{{ route('super-admin.ward-management') }}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                    <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-500 transition-colors">
                         Manage Beds
                     </a>
                 </div>
                 <div class="space-y-4">
-                    <p class="text-gray-600">Manage hospital beds and their assignments.</p>
-                    <a href="{{ route('super-admin.ward-management') }}" class="block text-primary hover:text-primary/80">
-                        View All Beds →
+                    <p class="text-gray-600">Manage hospital beds, their assignments, and more.</p>
+                </div>
+            </div> -->
+            
+            <!-- Emergency Dashboard Card -->
+            <div class="bg-[#faf6f2] rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Emergency Dashboard</h2>
+                    <a href="{{ route('emergency.dashboard') }}" class="px-4 py-2 bg-[#b4694e] text-white rounded-md hover:bg-[#c9836a] transition-colors">
+                        View Dashboard
                     </a>
                 </div>
-            </div> --}}
+                <div class="space-y-4">
+                    <p class="text-gray-600">Monitor bed availability across all wards in real-time.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Quick User Edit Section -->

@@ -7,6 +7,41 @@
 <!-- Add jQuery before the content -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- Add Sortable.js -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+
+<!-- Add Pusher -->
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
+<!-- Initialize Echo -->
+<script>
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: '{{ config('broadcasting.connections.pusher.key') }}',
+        cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+        forceTLS: true
+    });
+</script>
+
+<!-- Auto-refresh script for transfer operations -->
+<script>
+    // Check if we need to refresh the page after a transfer operation
+    document.addEventListener('DOMContentLoaded', function() {
+        // If this page loads and there's a transfer flag in local storage, remove it and refresh once
+        if (localStorage.getItem('bedtrack_transfer_refresh')) {
+            localStorage.removeItem('bedtrack_transfer_refresh');
+            console.log('Transfer operation detected - refreshing dashboard');
+            setTimeout(function() {
+                window.location.reload();
+            }, 500);
+        }
+    });
+</script>
+
+<!-- Add this line after the first @section line to include CSRF token -->
+@csrf
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div class="py-6 bg-secondary">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Flash Message -->
@@ -23,7 +58,7 @@
             </div>
             <div class="flex space-x-3">
                 @if(auth()->user()->role === 'admin' || auth()->user()->role === 'superadmin')
-                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-[#BB8858] text-white rounded-md hover:bg-[#D8A48F] transition-colors">
+                <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-[#92ada4] text-white rounded-md hover:bg-[#daa38f] transition-colors">
                     Admin Dashboard
                 </a>
                 @endif
@@ -44,6 +79,7 @@
                                 <div class="relative" id="activity-container">
                                     <!-- Activity logs will be loaded here -->
                                     @include('partials.activity-logs', ['activityLogs' => $activityLogs])
+                                    
 
                                     @if($hasMoreLogs)
                                     <div class="text-center mt-6">
@@ -106,7 +142,7 @@
                                                     </div>
                                                     <div class="flex items-center">
                                                         <span class="w-6 h-6 flex items-center justify-center text-gray-600 mr-2">👶</span>
-                                                        <span class="text-sm">Paediatric</span>
+                                                        <span class="text-sm">@if($ward->ward_name === 'Maternity Ward' || $ward->ward_name === 'Nursery Ward' || $ward->ward_name === 'Nursery') Newborn @else Paediatric @endif</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -141,7 +177,7 @@
                     </div>
                     <div>
                         <div class="text-lg font-bold text-gray-900">{{ $totalBeds }}</div>
-                        <div class="text-xs text-gray-500">Total</div>
+                        <div class="text-xs text-gray-500">Total Beds in {{ $ward->ward_name }}</div>
                     </div>
                 </div>
             </div>
@@ -209,7 +245,7 @@
                     </div>
                     <div>
                         <div class="text-lg font-bold text-gray-900">{{ $todayDischarges }}</div>
-                        <div class="text-xs text-gray-500">Today's</div>
+                        <div class="text-xs text-gray-500">Today's Discharges</div>
                     </div>
                 </div>
             </div>
@@ -242,12 +278,164 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['transfer_in'] }}</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['today_transfer_in'] ?? 0 }} </div>
                         <div class="text-xs text-gray-500">Transfer In</div>
+                        <div class="text-xs text-gray-400 mt-1">All incoming transfers</div>
+                        <div class="text-xs text-purple-500 mt-1">{{ $bedCounts['today_transfer_in'] ?? 0 }} transfers today</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-3 border-b border-gray-200 bg-amber-50">
+                    <h3 class="text-sm font-medium text-gray-900">Transfer Out</h3>
+                </div>
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l5-5m0 0l-5-5m5 5H7m-4-4h.01M17 21h.01M17 3h.01M3 21h.01M3 3h.01" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['today_transfer_out'] ?? 0 }}</div>
+                        <div class="text-xs text-gray-500">Transfer Out</div>
+                        <div class="text-xs text-gray-400 mt-1">All outgoing transfers</div>
+                        <div class="text-xs text-amber-500 mt-1">{{ $bedCounts['today_transfer_out'] ?? 0 }} transfers today</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-3 border-b border-gray-200 bg-slate-50">
+                    <h3 class="text-sm font-medium text-gray-900">Blocked Rooms</h3>
+                </div>
+                <div class="p-3 flex items-center">
+                    <div class="w-8 h-8 bg-slate-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">{{ $bedCounts['blocked'] }}</div>
+                        <div class="text-xs text-gray-500">Blocked Rooms</div>
+                        <div class="text-xs text-gray-400 mt-1">Beds in blocked rooms are not counted as available</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        @if(!$ward->is_nursery && $totalBassinets > 0)
+        <!-- Bassinet Status Summary Cards -->
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Bassinet Status</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-sm font-medium text-gray-900">Total Bassinets</h3>
+                    </div>
+                    <div class="p-3 flex items-center">
+                        <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $totalBassinets }}</div>
+                            <div class="text-xs text-gray-500">Total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 bg-green-50">
+                        <h3 class="text-sm font-medium text-gray-900">Available</h3>
+                    </div>
+                    <div class="p-3 flex items-center">
+                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $bassinetCounts['available'] }}</div>
+                            <div class="text-xs text-gray-500">Available</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 bg-red-50">
+                        <h3 class="text-sm font-medium text-gray-900">Occupied</h3>
+                    </div>
+                    <div class="p-3 flex items-center">
+                        <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $bassinetCounts['occupied'] }}</div>
+                            <div class="text-xs text-gray-500">Occupied</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 bg-yellow-50">
+                        <h3 class="text-sm font-medium text-gray-900">Transfer Out</h3>
+                    </div>
+                    <div class="p-3 flex items-center">
+                        <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $bassinetCounts['transfer_out'] }}</div>
+                            <div class="text-xs text-gray-500">Transfer Out</div>
+                            <div class="text-xs text-gray-400 mt-1">All outgoing transfers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 bg-purple-50">
+                        <h3 class="text-sm font-medium text-gray-900">Transfer In</h3>
+                    </div>
+                    <div class="p-3 flex items-center">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $bassinetCounts['transfer_in'] }}</div>
+                            <div class="text-xs text-gray-500">Transfer In</div>
+                            <div class="text-xs text-gray-400 mt-1">All incoming transfers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-3 border-b border-gray-200 bg-blue-50">
+                        <h3 class="text-sm font-medium text-gray-900">Discharged</h3>
+                    </div>
+                    <div class="p-3 flex items-center">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-gray-900">{{ $bassinetCounts['discharged'] ?? 0 }}</div>
+                            <div class="text-xs text-gray-500">Discharged</div>
+                            <div class="text-xs text-gray-400 mt-1">Today's discharges</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Recent Discharges Section -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
@@ -262,7 +450,7 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Bed
+                                    Location
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Room
@@ -282,9 +470,15 @@
                             @foreach($recentDischarges as $discharge)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <a href="{{ route('beds.show', $discharge->bed_id) }}" class="text-primary hover:text-primary-dark">
-                                        Bed #{{ $discharge->bed->bed_number }}
-                                    </a>
+                                    @if(isset($discharge->is_bassinet) && $discharge->is_bassinet)
+                                        <span class="text-primary">
+                                            Bassinet #{{ $discharge->bassinet->bassinet_number }}
+                                        </span>
+                                    @else
+                                        <a href="{{ route('beds.show', $discharge->bed_id) }}" class="text-primary hover:text-primary-dark">
+                                            Bed #{{ $discharge->bed->bed_number }}
+                                        </a>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ $discharge->room->room_name }}
@@ -292,7 +486,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <span class="mr-2">{{ $discharge->patient_name }}</span>
-                                        @if($discharge->gender)
+                                        @if(isset($discharge->gender))
                                             <span class="inline-flex items-center justify-center w-5 h-5 rounded-full {{ $discharge->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold text-xs">
                                                 {{ $discharge->gender == 'Male' ? '♂' : '♀' }}
                                             </span>
@@ -300,14 +494,26 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($discharge->patient_category)
+                                    @if(isset($discharge->patient_category))
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                            {{ $discharge->patient_category == 'Adult' ? '👨 Adult' : '👶 Paediatric' }}
+                                            @if($discharge->patient_category == 'Adult')
+                                                👨 Adult
+                                            @else
+                                                @if(($discharge->room->ward->ward_name === 'Maternity Ward' || $discharge->room->ward->ward_name === 'Nursery Ward' || $discharge->room->ward->ward_name === 'Nursery') && $discharge->patient_category === 'Paediatric')
+                                                    👶 Newborn
+                                                @else
+                                                    👶 Paediatric
+                                                @endif
+                                            @endif
+                                        </span>
+                                    @elseif(isset($discharge->is_bassinet) && $discharge->is_bassinet)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            👶 Newborn
                                         </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $discharge->discharged_at->format('M d, Y - h:i A') }}
+                                    {{ $discharge->discharged_at instanceof \Carbon\Carbon ? $discharge->discharged_at->format('M d, Y - h:i A') : \Carbon\Carbon::parse($discharge->discharged_at)->format('M d, Y - h:i A') }}
                                 </td>
                             </tr>
                             @endforeach
@@ -318,12 +524,12 @@
                 <div class="text-center py-8 text-gray-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p>No recent discharges found in this ward.</p>
-                </div>
-                @endif
-            </div>
+            </svg>
+            <p>No recent discharges found in this ward.</p>
         </div>
+        @endif
+    </div>
+</div>
 
         <!-- Recent Transfers -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -418,7 +624,7 @@
                     <!-- Maternity Ward Layout -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         @foreach($rooms as $room)
-                        <div class="border rounded-lg overflow-hidden shadow-sm" data-room-id="{{ $room->id }}">
+                        <div class="border rounded-lg overflow-hidden shadow-sm cursor-move" data-room-id="{{ $room->id }}">
                         <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                 <h3 class="font-medium text-gray-700">{{ $room->room_name }}</h3>
                             <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
@@ -496,14 +702,22 @@
                                                         <div class="flex items-center space-x-2">
                                                             @if($bed->patient_category)
                                                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
-                                                                    {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
+                                                                    @if($bed->patient_category == 'Adult')
+                                                                        👨
+                                                                    @else
+                                                                        @if(($bed->room->ward->ward_name === 'Maternity Ward' || $bed->room->ward->ward_name === 'Nursery Ward' || $bed->room->ward->ward_name === 'Nursery') && $bed->patient_category === 'Paediatric')
+                                                                            👶
+                                                                        @else
+                                                                            👶
+                                                                        @endif
+                                                                    @endif
                                                                 </span>
                                                             @endif
                                                             @if($bed->has_hazard)
                                                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700" title="{{ $bed->hazard_notes }}">
-                                                                    ☠️
-                                                                </span>
-                                                            @endif
+                                                        ☠️
+                                                    </span>
+                                                    @endif
                                                         </div>
                                                         @if($bed->occupied_at)
                                                             <div class="text-sm text-gray-600 italic">
@@ -511,21 +725,21 @@
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    @if($bed->status == 'Housekeeping')
+                                                            @if($bed->status == 'Housekeeping')
                                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
                                                         </span>
                                                     @endif
-                                                </div>
-                                            @else
-                                                <p class="text-sm text-gray-500 italic">
+                                            </div>
+                                        @else
+                                            <p class="text-sm text-gray-500 italic">
                                                         No patient
                                                         @if($bed->has_hazard)
                                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700 float-right" title="{{ $bed->hazard_notes }}">
-                                                            ☠️
-                                                        </span>
+                                                    ☠️
+                                                </span>
                                                 @endif
                                             </p>
                                         @endif
@@ -542,14 +756,14 @@
                                         @foreach($room->bassinets as $bassinet)
                                         <div class="block border rounded-md overflow-hidden transition-transform hover:scale-105 hover:shadow-md {{
                                             $bassinet->status === 'Available' ? 'border-green-300 bg-green-50' :
-                                            ($bassinet->status === 'Occupied' ? 'border-blue-300 bg-blue-50' :
+                                            ($bassinet->status === 'Occupied' ? 'border-red-300 bg-red-50' :
                                             ($bassinet->status === 'Transfer-out' ? 'border-yellow-300 bg-yellow-50' :
                                             ($bassinet->status === 'Transfer-in' ? 'border-purple-300 bg-purple-50' :
                                             'border-gray-300 bg-gray-50')))
                                         }}">
                                             <div class="px-3 py-2 border-b {{
                                                 $bassinet->status === 'Available' ? 'bg-green-100 text-green-800' :
-                                                ($bassinet->status === 'Occupied' ? 'bg-blue-100 text-blue-800' :
+                                                ($bassinet->status === 'Occupied' ? 'bg-red-100 text-red-800' :
                                                 ($bassinet->status === 'Transfer-out' ? 'bg-yellow-100 text-yellow-800' :
                                                 ($bassinet->status === 'Transfer-in' ? 'bg-purple-100 text-purple-800' :
                                                 'bg-gray-100 text-gray-800')))
@@ -558,7 +772,7 @@
                                                     <span class="font-medium">Bassinet {{ $bassinet->bassinet_number }}</span>
                                                     <span class="text-xs px-1.5 py-0.5 rounded-full {{
                                                         $bassinet->status === 'Available' ? 'bg-green-200 text-green-900' :
-                                                        ($bassinet->status === 'Occupied' ? 'bg-blue-200 text-blue-900' :
+                                                        ($bassinet->status === 'Occupied' ? 'bg-red-200 text-red-900' :
                                                         ($bassinet->status === 'Transfer-out' ? 'bg-yellow-200 text-yellow-900' :
                                                         ($bassinet->status === 'Transfer-in' ? 'bg-purple-200 text-purple-900' :
                                                         'bg-gray-200 text-gray-900')))
@@ -568,7 +782,7 @@
                                                 </div>
                                             </div>
                                             <div class="p-3">
-                                                @if($bassinet->status === 'Occupied')
+                                                    @if($bassinet->status === 'Occupied')
                                                     <div class="flex justify-between items-start">
                                                         <div class="space-y-2">
                                                             <div class="flex items-center space-x-2">
@@ -589,18 +803,18 @@
                                                                 <p class="text-xs text-gray-500">
                                                                     Occupied: {{ $bassinet->occupied_at->format('M d, Y h:i A') }}
                                                                 </p>
-                                                            @endif
-                                                        </div>
-                                                        <div class="flex space-x-2">
+                                                    @endif
+                                                </div>
+                                                <div class="flex space-x-2">
                                                             <button type="button" class="transfer-bassinet px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors" 
                                                                     data-bassinet-id="{{ $bassinet->id }}">
-                                                                Transfer
-                                                            </button>
+                                                            Transfer
+                                                        </button>
                                                             <button type="button" class="discharge-bassinet px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors" 
                                                                     data-bassinet-id="{{ $bassinet->id }}">
                                                                 Discharge
                                                             </button>
-                                                        </div>
+                                                </div>
                                                     </div>
                                                 @else
                                                     <div class="flex justify-between items-center">
@@ -624,7 +838,7 @@
                     <!-- Regular Ward Layout -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         @foreach($rooms as $room)
-                        <div class="border rounded-lg overflow-hidden shadow-sm" data-room-id="{{ $room->id }}">
+                        <div class="border rounded-lg overflow-hidden shadow-sm cursor-move" data-room-id="{{ $room->id }}">
                             <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                 <h3 class="font-medium text-gray-700">{{ $room->room_name }}</h3>
                                 <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
@@ -709,39 +923,47 @@
                                             </div>
                                         </div>
                                         <div class="p-3">
-                                            <div class="flex justify-between items-start">
+                                                <div class="flex justify-between items-start">
                                                 <div class="space-y-2">
                                                     @if($bed->status != 'Available')
                                                         <div class="flex items-center space-x-2">
                                                             <span class="text-sm font-medium text-gray-700">{{ $bed->patient_name }}</span>
-                                                            @if($bed->gender)
+                                                        @if($bed->gender)
                                                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full {{ $bed->gender == 'Male' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }} font-bold text-xs">
-                                                                    {{ $bed->gender == 'Male' ? '♂' : '♀' }}
-                                                                </span>
-                                                            @endif
+                                                                {{ $bed->gender == 'Male' ? '♂' : '♀' }}
+                                                            </span>
+                                                        @endif
                                                         </div>
                                                         <div class="flex items-center space-x-2">
-                                                            @if($bed->patient_category)
-                                                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
-                                                                    {{ $bed->patient_category == 'Adult' ? '👨' : '👶' }}
-                                                                </span>
-                                                            @endif
+                                                        @if($bed->patient_category)
+                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-700">
+                                                                @if($bed->patient_category == 'Adult')
+                                                                    👨
+                                                                @else
+                                                                    @if(($bed->room->ward->ward_name === 'Maternity Ward' || $bed->room->ward->ward_name === 'Nursery Ward' || $bed->room->ward->ward_name === 'Nursery') && $bed->patient_category === 'Paediatric')
+                                                                        👶
+                                                                    @else
+                                                                        👶
+                                                                    @endif
+                                                                @endif
+                                                            </span>
+                                                        @endif
                                                             @if($bed->has_hazard)
                                                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700" title="{{ $bed->hazard_notes }}">
                                                                     ☠️
                                                                 </span>
                                                             @endif
-                                                        </div>
+                                                    </div>
                                                         @if($bed->occupied_at)
                                                             <div class="text-sm text-gray-600 italic">
                                                                 Occupied: {{ $bed->occupied_at->format('M d, Y h:i A') }}
-                                                            </div>
+                                                </div>
                                                         @endif
-                                                    @else
-                                                        <p class="text-sm text-gray-500 italic">
-                                                            No patient
-                                                        </p>
-                                                    @endif
+                                            @else
+                                                <p class="text-sm text-gray-500 italic">
+                                                    No patient
+                                                </p>
+                                            @endif
                                                 </div>
                                                 @if($bed->status == 'Housekeeping')
                                                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 text-pink-700">
@@ -845,8 +1067,8 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
+    </div>
+</div>
 
         <!-- Register Baby Modal -->
         <div id="registerBabyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
@@ -950,189 +1172,252 @@
                         </button>
                     </div>
                 </div>
+    </div>
+</div>
+
+        <!-- Transfer Out Modal -->
+        <div id="transferOutModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Transfer Patient</h3>
+                        <button onclick="hideTransferOutModal()" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form id="transferOutForm" class="mt-4 space-y-4">
+                        @csrf
+                        <input type="hidden" id="transferOutBedId" name="bed_id">
+                        <div class="space-y-2">
+                            <label for="transferOutWard" class="block text-sm font-medium text-gray-700">Destination Ward</label>
+                            <select id="transferOutWard" name="destination_ward_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                    required>
+                                <option value="">Select Ward</option>
+                                @foreach($wards as $ward)
+                                    @if($ward->id != $currentWard->id)
+                                        <option value="{{ $ward->id }}">{{ $ward->ward_name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="transferOutRoom" class="block text-sm font-medium text-gray-700">Destination Room</label>
+                            <select id="transferOutRoom" name="destination_room_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                    required>
+                                <option value="">Select Room</option>
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="transferOutBed" class="block text-sm font-medium text-gray-700">Available Beds</label>
+                            <select id="transferOutBed" name="destination_bed_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                    required>
+                                <option value="">Select Bed</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button type="button" onclick="hideTransferOutModal()" 
+                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                                Transfer Patient
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <script>
-            function toggleLegend() {
-                const legendContent = document.getElementById('legendContent');
-                const legendToggleIcon = document.getElementById('legendToggleIcon');
+        @if(auth()->user()->role === 'superadmin' && false)
+        <!-- ... existing code ... -->
+        @endif
 
-                if (legendContent.classList.contains('hidden')) {
-                    legendContent.classList.remove('hidden');
-                    legendToggleIcon.innerHTML = `
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                `;
-                } else {
-                    legendContent.classList.add('hidden');
-                    legendToggleIcon.innerHTML = `
-                        <path fill-rule="evenodd" d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                `;
-                }
+<script>
+    function toggleLegend() {
+        const legendContent = document.getElementById('legendContent');
+        const legendToggleIcon = document.getElementById('legendToggleIcon');
+
+        if (legendContent.classList.contains('hidden')) {
+            legendContent.classList.remove('hidden');
+            legendToggleIcon.innerHTML = `
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            `;
+        } else {
+            legendContent.classList.add('hidden');
+            legendToggleIcon.innerHTML = `
+                <path fill-rule="evenodd" d="M5.293 12.707a1 1 0 010-1.414L9.586 7l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            `;
+        }
+    }
+
+    function showBlockRoomModal(roomId) {
+        const modal = document.getElementById('blockRoomModal');
+        const form = document.getElementById('blockRoomForm');
+        form.action = `/BedTrack/public/rooms/${roomId}/block`;
+        modal.classList.remove('hidden');
+        // Clear any previous input
+        document.getElementById('block_remarks').value = '';
+    }
+
+    function hideBlockRoomModal() {
+        const modal = document.getElementById('blockRoomModal');
+        modal.classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('blockRoomModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideBlockRoomModal();
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('blockRoomForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const formData = new FormData(form);
+        const blockRemarks = document.getElementById('block_remarks').value.trim();
+        
+        if (!blockRemarks) {
+            alert('Please enter a reason for blocking the room.');
+            return;
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
             }
-
-            function showBlockRoomModal(roomId) {
-                const modal = document.getElementById('blockRoomModal');
-                const form = document.getElementById('blockRoomForm');
-                form.action = `/BedTrack/public/rooms/${roomId}/block`;
-                modal.classList.remove('hidden');
-                // Clear any previous input
-                document.getElementById('block_remarks').value = '';
-            }
-
-            function hideBlockRoomModal() {
-                const modal = document.getElementById('blockRoomModal');
-                modal.classList.add('hidden');
-            }
-
-            // Close modal when clicking outside
-            document.getElementById('blockRoomModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    hideBlockRoomModal();
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Room not found');
                 }
-            });
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Failed to block room');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.error || 'Failed to block room');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'Failed to block room. Please try again.');
+        });
+    });
 
-            // Handle form submission
-            document.getElementById('blockRoomForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const form = this;
-                const formData = new FormData(form);
-                const blockRemarks = document.getElementById('block_remarks').value.trim();
-                
-                if (!blockRemarks) {
-                    alert('Please enter a reason for blocking the room.');
-                    return;
-                }
+    // Load more activity logs
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                const offset = parseInt(this.getAttribute('data-offset'));
+                const limit = 5; // Number of logs to load each time
 
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
+                // Show loading state
+                this.innerHTML = 'Loading...';
+                this.disabled = true;
+
+                // Make AJAX request to load more logs
+                fetch(`/BedTrack/public/activity-logs/load-more?offset=${offset}&limit=${limit}`, {
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        if (response.status === 404) {
-                            throw new Error('Room not found');
-                        }
-                        return response.json().then(data => {
-                            throw new Error(data.error || 'Failed to block room');
-                        });
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert(data.error || 'Failed to block room');
+                    // Append new log items to the timeline container
+                    const timelineContainer = document.querySelector('#activity-container .space-y-6');
+                    timelineContainer.insertAdjacentHTML('beforeend', data.html);
+
+                    // Update button state
+                    this.innerHTML = 'Load More';
+                    this.disabled = false;
+
+                    // Update offset for next request
+                    this.setAttribute('data-offset', offset + limit);
+
+                    // Hide button if no more logs
+                    if (!data.hasMore) {
+                        this.style.display = 'none';
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert(error.message || 'Failed to block room. Please try again.');
+                    console.error('Error loading more logs:', error);
+                    this.innerHTML = 'Error loading more logs. Try again.';
+                    this.disabled = false;
                 });
             });
+        }
+    });
 
-            // Load more activity logs
-            document.addEventListener('DOMContentLoaded', function() {
-                const loadMoreBtn = document.getElementById('load-more-btn');
-                if (loadMoreBtn) {
-                    loadMoreBtn.addEventListener('click', function() {
-                        const offset = parseInt(this.getAttribute('data-offset'));
-                        const limit = 5; // Number of logs to load each time
-
-                        // Show loading state
-                        this.innerHTML = 'Loading...';
-                        this.disabled = true;
-
-                        // Make AJAX request to load more logs
-                        fetch(`/BedTrack/public/activity-logs/load-more?offset=${offset}&limit=${limit}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Append new logs to the container
-                            const activityContainer = document.getElementById('activity-container');
-                            activityContainer.insertAdjacentHTML('beforeend', data.html);
-
-                            // Update button state
-                            this.innerHTML = 'Load More';
-                            this.disabled = false;
-
-                            // Update offset for next request
-                            this.setAttribute('data-offset', offset + limit);
-
-                            // Hide button if no more logs
-                            if (!data.hasMore) {
-                                this.style.display = 'none';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error loading more logs:', error);
-                            this.innerHTML = 'Error loading more logs. Try again.';
-                            this.disabled = false;
-                        });
+    @if(auth()->user()->role === 'superadmin')
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomContainer = document.querySelector('.grid');
+        if (roomContainer) {
+            new Sortable(roomContainer, {
+                animation: 150,
+                handle: '.cursor-move',
+                onEnd: function(evt) {
+                    const roomIds = Array.from(roomContainer.children).map((item, index) => ({
+                        id: item.dataset.roomId,
+                        sequence: index
+                    }));
+                    
+                    fetch('{{ route("super-admin.update-room-sequence") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ rooms: roomIds })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            const successMessage = document.createElement('div');
+                            successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
+                            successMessage.textContent = 'Room order updated successfully';
+                            document.body.appendChild(successMessage);
+                            setTimeout(() => successMessage.remove(), 3000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Show error message
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
+                        errorMessage.textContent = 'Failed to update room order';
+                        document.body.appendChild(errorMessage);
+                        setTimeout(() => errorMessage.remove(), 3000);
                     });
                 }
             });
-
-            @if(auth()->user()->role === 'superadmin')
-            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const roomContainer = document.querySelector('.grid');
-                    if (roomContainer) {
-                        new Sortable(roomContainer, {
-                            animation: 150,
-                            handle: '.cursor-move',
-                            onEnd: function(evt) {
-                                const roomIds = Array.from(roomContainer.children).map((item, index) => ({
-                                    id: item.dataset.roomId,
-                                    sequence: index
-                                }));
-                                
-                                fetch('{{ route("super-admin.update-room-sequence") }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    },
-                                    body: JSON.stringify({ rooms: roomIds })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        // Show success message
-                                        const successMessage = document.createElement('div');
-                                        successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
-                                        successMessage.textContent = 'Room order updated successfully';
-                                        document.body.appendChild(successMessage);
-                                        setTimeout(() => successMessage.remove(), 3000);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    // Show error message
-                                    const errorMessage = document.createElement('div');
-                                    errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
-                                    errorMessage.textContent = 'Failed to update room order';
-                                    document.body.appendChild(errorMessage);
-                                    setTimeout(() => errorMessage.remove(), 3000);
-                                });
-                            }
-                        });
-                    }
-                });
-            </script>
-            @endif
+        }
+    });
+    @endif
 
             // Handle transfer button click
             $(document).on('click', '.transfer-bassinet', function(e) {
@@ -1155,19 +1440,19 @@
                 setTimeout(() => {
                     modal.style.opacity = '1';
                 }, 10);
-            }
+    }
 
-            function hideTransferModal() {
+    function hideTransferModal() {
                 const modal = document.getElementById('transferModal');
                 modal.style.opacity = '0';
                 setTimeout(() => {
                     modal.classList.add('hidden');
                 }, 300);
-            }
+    }
 
-            // Load rooms when ward is selected
+    // Load rooms when ward is selected
             $('#destinationWard').change(function() {
-                const wardId = $(this).val();
+        const wardId = $(this).val();
                 const roomSelect = $('#destinationRoom');
                 const cribSelect = $('#destinationCrib');
                 
@@ -1191,9 +1476,9 @@
                             if (rooms.length === 0) {
                                 roomSelect.append('<option value="" disabled>No rooms available</option>');
                             } else {
-                                rooms.forEach(room => {
-                                    roomSelect.append(`<option value="${room.id}">${room.room_name}</option>`);
-                                });
+            rooms.forEach(room => {
+                roomSelect.append(`<option value="${room.id}">${room.room_name}</option>`);
+            });
                             }
                         },
                         error: function(xhr) {
@@ -1239,19 +1524,19 @@
                         }
                     });
                 }
-            });
+    });
 
-            // Handle transfer form submission
+    // Handle transfer form submission
             $('#transferForm').submit(function(e) {
-                e.preventDefault();
+        e.preventDefault();
                 
                 const bassinetId = $('#transferBassinetId').val();
                 const formData = new FormData(this);
-                
-                $.ajax({
+
+        $.ajax({
                     url: `/BedTrack/public/bassinets/${bassinetId}/transfer`,
                     type: 'POST',
-                    data: formData,
+            data: formData,
                     processData: false,
                     contentType: false,
                     headers: {
@@ -1259,21 +1544,21 @@
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    success: function(response) {
-                        if (response.success) {
+            success: function(response) {
+                if (response.success) {
                             hideTransferModal();
                             showAlert('success', response.message);
                             setTimeout(() => window.location.reload(), 1500);
-                        } else {
+                } else {
                             showAlert('error', response.message);
-                        }
-                    },
-                    error: function(xhr) {
+                }
+            },
+            error: function(xhr) {
                         console.error('Transfer error:', xhr);
                         showAlert('error', xhr.responseJSON?.message || 'Failed to transfer baby');
-                    }
-                });
-            });
+            }
+        });
+    });
 
             // Close modal when clicking outside
             document.getElementById('transferModal').addEventListener('click', function(e) {
@@ -1296,25 +1581,25 @@
             });
 
             function showRegisterBabyModal() {
-                const modal = document.getElementById('registerBabyModal');
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.style.opacity = '1';
-                }, 10);
-            }
+        const modal = document.getElementById('registerBabyModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.style.opacity = '1';
+        }, 10);
+    }
 
-            function hideRegisterBabyModal() {
-                const modal = document.getElementById('registerBabyModal');
-                modal.style.opacity = '0';
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
-            }
+    function hideRegisterBabyModal() {
+        const modal = document.getElementById('registerBabyModal');
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
 
-            // Handle register baby form submission
+    // Handle register baby form submission
             $('#registerBabyForm').submit(function(e) {
-                e.preventDefault();
-                
+        e.preventDefault();
+        
                 const bassinetId = $(this).data('bassinet-id');
                 const formData = new FormData(this);
                 
@@ -1324,17 +1609,17 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    headers: {
+            headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     success: function(response) {
-                        if (response.success) {
-                            hideRegisterBabyModal();
+            if (response.success) {
+                hideRegisterBabyModal();
                             showAlert('success', response.message);
                             setTimeout(() => window.location.reload(), 1500);
-                        } else {
+            } else {
                             showAlert('error', response.message);
                         }
                     },
@@ -1342,15 +1627,15 @@
                         console.error('Registration error:', xhr);
                         showAlert('error', xhr.responseJSON?.message || 'Failed to register baby');
                     }
-                });
-            });
+        });
+    });
 
-            // Close modal when clicking outside
-            document.getElementById('registerBabyModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    hideRegisterBabyModal();
-                }
-            });
+    // Close modal when clicking outside
+    document.getElementById('registerBabyModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideRegisterBabyModal();
+        }
+    });
 
             function showAlert(type, message) {
                 const alertDiv = document.createElement('div');
@@ -1433,6 +1718,150 @@
                 const bassinetId = $(this).data('bassinet-id');
                 showDischargeModal(bassinetId);
             });
-        </script>
+
+            // Handle transfer out button click
+            $(document).on('click', '.transfer-out', function(e) {
+                e.preventDefault();
+                const bedId = $(this).data('bed-id');
+                $('#transferOutBedId').val(bedId);
+                
+                // Reset the form
+                $('#transferOutWard').val('');
+                $('#transferOutRoom').empty().append('<option value="">Select Room</option>');
+                $('#transferOutBed').empty().append('<option value="">Select Bed</option>');
+                
+                // Show the modal
+                showTransferOutModal();
+            });
+
+            function showTransferOutModal() {
+                const modal = document.getElementById('transferOutModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                }, 10);
+            }
+
+            function hideTransferOutModal() {
+                const modal = document.getElementById('transferOutModal');
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            // Load rooms when ward is selected
+            $('#transferOutWard').change(function() {
+                const wardId = $(this).val();
+                const roomSelect = $('#transferOutRoom');
+                const bedSelect = $('#transferOutBed');
+                
+                // Clear room and bed selections
+                roomSelect.empty().append('<option value="">Select Room</option>');
+                bedSelect.empty().append('<option value="">Select Bed</option>');
+                
+                if (wardId) {
+                    // Fetch rooms for the selected ward
+                    $.ajax({
+                        url: `/BedTrack/public/api/wards/${wardId}/rooms`,
+                        type: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(rooms) {
+                            roomSelect.empty().append('<option value="">Select Room</option>');
+                            if (rooms.length === 0) {
+                                roomSelect.append('<option value="" disabled>No rooms available</option>');
+                            } else {
+                                rooms.forEach(room => {
+                                    roomSelect.append(`<option value="${room.id}">${room.room_name}</option>`);
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error loading rooms:', xhr);
+                            showAlert('error', 'Failed to load rooms: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                        }
+                    });
+                }
+            });
+
+            // Load beds when room is selected
+            $('#transferOutRoom').change(function() {
+                const roomId = $(this).val();
+                const bedSelect = $('#transferOutBed');
+                
+                // Clear bed selection
+                bedSelect.empty().append('<option value="">Select Bed</option>');
+                
+                if (roomId) {
+                    // Fetch available beds for the selected room
+                    $.ajax({
+                        url: `/BedTrack/public/api/rooms/${roomId}/available-beds`,
+                        type: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(beds) {
+                            bedSelect.empty().append('<option value="">Select Bed</option>');
+                            if (beds.length === 0) {
+                                bedSelect.append('<option value="" disabled>No available beds</option>');
+                            } else {
+                                beds.forEach(bed => {
+                                    bedSelect.append(`<option value="${bed.id}">${bed.bed_number}</option>`);
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error loading beds:', xhr);
+                            showAlert('error', 'Failed to load beds: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                        }
+                    });
+                }
+            });
+
+            // Handle transfer out form submission
+            $('#transferOutForm').submit(function(e) {
+                e.preventDefault();
+                
+                const bedId = $('#transferOutBedId').val();
+                const formData = new FormData(this);
+                
+                $.ajax({
+                    url: `/BedTrack/public/beds/${bedId}/update-status`,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            hideTransferOutModal();
+                            showAlert('success', response.message);
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showAlert('error', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Transfer error:', xhr);
+                        showAlert('error', xhr.responseJSON?.message || 'Failed to transfer patient');
+                    }
+                });
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('transferOutModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideTransferOutModal();
+                }
+            });
+</script>
 @endsection
 

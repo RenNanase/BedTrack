@@ -64,6 +64,10 @@ class AuthController extends Controller
                 $route = $user->role === 'superadmin' ? 'super-admin.dashboard' : 'admin.dashboard';
                 return redirect()->route($route);
             }
+            // If user is emergency role, redirect to emergency dashboard
+            elseif ($user->role === 'emergency') {
+                return redirect()->route('emergency.dashboard');
+            }
             // Otherwise, redirect to ward selection
             else {
                 return redirect()->route('select.ward');

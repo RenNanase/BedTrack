@@ -1,13 +1,45 @@
 @extends('layouts.app')
 
 @section('content')
+<script>
+    // Check if we need to refresh the page after a transfer operation
+    document.addEventListener('DOMContentLoaded', function() {
+        // If this page loads and there's a transfer flag in local storage, refresh once
+        if (localStorage.getItem('bedtrack_transfer_refresh')) {
+            localStorage.removeItem('bedtrack_transfer_refresh');
+            console.log('Transfer operation detected - refreshing admin dashboard');
+            setTimeout(function() {
+                window.location.reload();
+            }, 500);
+        }
+    });
+</script>
+
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+
+    
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <div class="text-sm text-gray-600">{{ $currentDateTime }}</div>
         </div>
 
+        <!-- Emergency Dashboard Card -->
+        <div class="mb-8">
+            <div class="bg-[#faf6f2] rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Emergency Dashboard</h2>
+                    <a href="{{ route('emergency.dashboard') }}" class="px-4 py-2 bg-[#b4694e] text-white rounded-md hover:bg-[#c9836a] transition-colors">
+                        View Dashboard
+                    </a>
+                </div>
+                <div class="space-y-4">
+                    <p class="text-gray-600">Monitor bed availability across all wards in real-time.</p>
+                </div>
+            </div>
+        </div>
+        
         <!-- Wards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             @foreach($wardSummaries as $summary)
@@ -37,6 +69,21 @@
                             <div class="text-3xl font-bold text-red-600">{{ $summary['occupied_beds'] }}</div>
                             <div class="text-sm text-red-800">Occupied</div>
                             <div class="text-xs text-red-600">{{ $summary['occupied_percentage'] }}%</div>
+                        </div>
+                        <div class="bg-amber-50 p-3 rounded-lg">
+                            <div class="text-3xl font-bold text-amber-600">{{ $summary['today_transfer_out'] ?? 0 }}</div>
+                            <div class="text-sm text-amber-800">Transfer Out</div>
+                            <div class="text-xs text-amber-500">{{ $summary['today_transfer_out'] ?? 0 }} today</div>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-600">{{ $summary['today_transfer_in'] ?? 0 }}</div>
+                            <div class="text-sm text-purple-800">Transfer In</div>
+                            <div class="text-xs text-purple-500">{{ $summary['today_transfer_in'] ?? 0 }} today</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg">
+                            <div class="text-3xl font-bold text-slate-600">{{ $summary['blocked_rooms'] ?? 0 }}</div>
+                            <div class="text-sm text-slate-800">Blocked Rooms</div>
+                            <div class="text-xs text-slate-500">{{ $summary['beds_in_blocked_rooms'] ?? 0 }} beds unavailable</div>
                         </div>
                     </div>
 
@@ -72,6 +119,8 @@
             <p class="text-gray-600">No wards available in the system.</p>
         </div>
         @endif
+
+
     </div>
 </div>
 @endsection

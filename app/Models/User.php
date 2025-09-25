@@ -26,7 +26,6 @@ class User extends Authenticatable
         'name',
         'password',
         'role',
-        'ward_id',
     ];
 
     /**
@@ -54,7 +53,7 @@ class User extends Authenticatable
     protected function isAdmin(): Attribute
     {
         return Attribute::make(
-            get: fn () => in_array($this->role, ['admin', 'superadmin']),
+            get: fn () => in_array($this->role, ['admin', 'superadmin', 'nurse-manager']),
         );
     }
 

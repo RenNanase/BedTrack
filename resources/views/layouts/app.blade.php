@@ -64,7 +64,7 @@
                     debugEl.scrollTop = debugEl.scrollHeight;
                 }
                 
-                // Test Pusher connection
+                Test Pusher connection
                 try {
                     log('Initializing Pusher test...');
                     const testPusher = new Pusher('{{ env('PUSHER_APP_KEY') }}', {
@@ -277,17 +277,21 @@
                         </div>
                         <div class="flex items-center">
                             @if(Auth::user()->role === 'superadmin')
-                            <a href="{{ route('super-admin.dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
-                                Super Admin Dashboard
-                            </a>
-                            <a href="{{ route('users.index') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
-                                User Management
-                            </a>
+                                <a href="{{ route('super-admin.dashboard') }}" class="flex items-center px-4 py-2 text-gray-700 {{ request()->routeIs('super-admin.*') ? 'rounded bg-[#daa38f] border-r-4 border-primary' : '' }}">
+                                    <span class="ml-2">Super Admin</span>
+                                </a>
                             @elseif(Auth::user()->role === 'admin')
-                            <a href="{{ route('admin.dashboard') }}" class="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">
-                                Admin Dashboard
-                            </a>
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-gray-700 {{ request()->routeIs('admin.*') ? 'rounded bg-[#daa38f] border-primary ' : '' }}">
+                                    <span class="ml-2">Admin Dashboard</span>
+                                </a>
                             @endif
+                            
+                            @if(Auth::user()->role === 'emergency')
+                                <a href="{{ route('emergency.dashboard') }}" class="flex items-center px-4 py-2 text-gray-700 {{ request()->routeIs('emergency.*') ? 'rounded bg-[#daa38f] border-r-4 border-primary' : '' }}">
+                                    <span class="ml-2">Emergency Dashboard</span>
+                                </a>
+                            @endif
+                            
                             <div class="ml-3 relative">
                                 <div>
                                     <span class="mr-2">{{ Auth::user()->name }}</span>

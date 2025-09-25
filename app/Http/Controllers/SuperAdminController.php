@@ -120,6 +120,7 @@ class SuperAdminController extends Controller
                 'ward_id' => 'required|exists:wards,id',
                 'room_name' => 'required|string|max:255',
                 'room_type' => 'required|in:regular,nursery',
+                'capacity' => 'nullable|integer|min:1|max:50',
             ]);
 
             $ward = Ward::findOrFail($request->ward_id);
@@ -133,6 +134,7 @@ class SuperAdminController extends Controller
                 'room_name' => $request->room_name,
                 'room_type' => $request->room_type,
                 'sequence' => $newSequence,
+                'capacity' => $request->capacity ?? 2,
             ]);
 
             DB::commit();
@@ -156,23 +158,39 @@ class SuperAdminController extends Controller
      */
     public function addBed(Request $request)
     {
-        $this->checkSuperAdmin();
+        try {
+            DB::beginTransaction();
+            
+            $this->checkSuperAdmin();
 
-        $request->validate([
-            'room_id' => 'required|exists:rooms,id',
-            'bed_number' => 'required|string|max:255',
-            'bed_type' => 'required|in:regular,crib',
-        ]);
+            $request->validate([
+                'room_id' => 'required|exists:rooms,id',
+                'bed_number' => 'required|string|max:255',
+                'bed_type' => 'required|in:regular,crib',
+            ]);
 
-        Bed::create([
-            'room_id' => $request->room_id,
-            'bed_number' => $request->bed_number,
-            'bed_type' => $request->bed_type,
-            'status' => 'Available',
-        ]);
+            $bed = Bed::create([
+                'room_id' => $request->room_id,
+                'bed_number' => $request->bed_number,
+                'bed_type' => $request->bed_type,
+                'status' => 'Available',
+            ]);
+            
+            DB::commit();
 
-        return redirect()->route('super-admin.ward-management')
-            ->with('success', 'Bed added successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Bed added successfully.',
+                'bed' => $bed
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add bed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -204,10 +222,29 @@ class SuperAdminController extends Controller
      */
     public function deleteBed(Bed $bed)
     {
-        $this->checkSuperAdmin();
+        try {
+            DB::beginTransaction();
+            
+            $this->checkSuperAdmin();
 
-        $bed->delete();
-        return redirect()->route('super-admin.ward-management')
-            ->with('success', 'Bed deleted successfully.');
+            // Get the room and ward info for redirecting back with the correct state
+            $roomId = $bed->room_id;
+            $wardId = $bed->room->ward_id;
+            
+            $bed->delete();
+            
+            DB::commit();
+            
+            // Redirect back to the ward management page with a success message
+            return redirect()->route('super-admin.ward-management')
+                ->with('success', 'Bed deleted successfully.')
+                ->with('expanded_ward', $wardId)
+                ->with('expanded_room', $roomId);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return redirect()->route('super-admin.ward-management')
+                ->with('error', 'Failed to delete bed: ' . $e->getMessage());
+        }
     }
 }

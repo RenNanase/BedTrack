@@ -56,14 +56,48 @@ class AdminController extends Controller
                 $query->where('ward_id', $ward->id);
             })->get();
 
-            // Count total beds
-            $totalBeds = $beds->count();
+            // Get active beds (not in blocked rooms)
+            $activeBedsQuery = Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id)
+                      ->where('is_blocked', false);
+            });
+            $activeBeds = $activeBedsQuery->get();
 
-            // Count beds by status
-            $availableBeds = $beds->where('status', 'Available')->count();
-            $bookedBeds = $beds->where('status', 'Booked')->count();
-            $occupiedBeds = $beds->where('status', 'Occupied')->count();
-            $dischargedBeds = $beds->where('status', 'Discharged')->count();
+            // Count total beds (excluding those in blocked rooms)
+            $totalBeds = $activeBeds->count();
+
+            // Count beds by status (only count active beds)
+            $availableBeds = $activeBeds->where('status', 'Available')->count();
+            $bookedBeds = $activeBeds->where('status', 'Booked')->count();
+            $occupiedBeds = $activeBeds->where('status', 'Occupied')->count();
+            $dischargedBeds = $activeBeds->where('status', 'Discharged')->count();
+            
+            // For transfers, count ALL beds regardless of room blocked status
+            $transferOutBeds = $beds->where('status', 'Transfer-out')->count();
+            $transferInBeds = $beds->where('status', 'Transfer-in')->count();
+            
+            // Count blocked rooms
+            $blockedRooms = $ward->rooms()->where('is_blocked', true)->count();
+            
+            // Count beds in blocked rooms
+            $bedsInBlockedRooms = Bed::whereHas('room', function ($query) use ($ward) {
+                $query->where('ward_id', $ward->id)
+                      ->where('is_blocked', true);
+            })->count();
+
+            // Also count today's transfers from transfer logs
+            $today = \Carbon\Carbon::today();
+            $transferOutLogsCount = \App\Models\TransferLog::whereHas('sourceRoom', function($query) use ($ward) {
+                    $query->where('ward_id', $ward->id);
+                })
+                ->whereDate('transferred_at', $today)
+                ->count();
+                
+            $transferInLogsCount = \App\Models\TransferLog::whereHas('destinationRoom', function($query) use ($ward) {
+                    $query->where('ward_id', $ward->id);
+                })
+                ->whereDate('transferred_at', $today)
+                ->count();
 
             // Get today's discharge count
             $todayDischarges = DischargeLog::whereHas('room', function ($query) use ($ward) {
@@ -80,7 +114,13 @@ class AdminController extends Controller
                 'booked_beds' => $bookedBeds,
                 'occupied_beds' => $occupiedBeds,
                 'discharged_beds' => $dischargedBeds,
+                'transfer_out_beds' => $transferOutBeds,
+                'transfer_in_beds' => $transferInBeds,
+                'blocked_rooms' => $blockedRooms,
+                'beds_in_blocked_rooms' => $bedsInBlockedRooms,
                 'today_discharges' => $todayDischarges,
+                'today_transfer_out' => $transferOutLogsCount,
+                'today_transfer_in' => $transferInLogsCount,
                 'available_percentage' => $totalBeds > 0 ? round(($availableBeds / $totalBeds) * 100) : 0,
                 'occupied_percentage' => $totalBeds > 0 ? round(($occupiedBeds / $totalBeds) * 100) : 0,
             ];

@@ -45,12 +45,12 @@ class FixNurseryWard extends Command
             $nurseryRoom = Room::create([
                 'ward_id' => $nurseryWard->id,
                 'room_name' => 'Nursery Room',
-                'capacity' => 20,
+                'capacity' => 9,
                 'is_blocked' => false,
             ]);
 
             // Create initial cribs
-            for ($i = 1; $i <= 20; $i++) {
+            for ($i = 1; $i <= 9; $i++) {
                 Bed::create([
                     'bed_number' => 'Crib ' . $i,
                     'room_id' => $nurseryRoom->id,

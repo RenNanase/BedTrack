@@ -15,6 +15,7 @@ class TransferLog extends Model
         'source_room_id',
         'source_bassinet_id',
         'destination_bed_id',
+        'destination_bassinet_id',
         'destination_room_id',
         'patient_name',
         'patient_category',
@@ -66,5 +67,10 @@ class TransferLog extends Model
     public function sourceBassinet()
     {
         return $this->belongsTo(Bassinet::class, 'source_bassinet_id');
+    }
+    
+    public function destinationBassinet()
+    {
+        return $this->belongsTo(Bassinet::class, 'destination_bassinet_id');
     }
 }

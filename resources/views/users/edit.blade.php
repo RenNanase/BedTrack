@@ -74,6 +74,8 @@
                             <option value="">Select a role</option>
                             <option value="staff" {{ old('role', $user->role) == 'staff' ? 'selected' : '' }}>Staff</option>
                             <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="emergency" {{ old('role', $user->role) == 'emergency' ? 'selected' : '' }}>Emergency Department</option>
+                            <option value="nurse-manager" {{ old('role', $user->role) == 'nurse-manager' ? 'selected' : '' }}>Nurse Manager</option>
                             <option value="superadmin" {{ old('role', $user->role) == 'superadmin' ? 'selected' : '' }}>Super Admin</option>
                         </select>
                         @error('role')
@@ -82,17 +84,37 @@
                     </div>
 
                     <div>
-                        <label for="ward_id" class="block text-sm font-medium text-gray-700">Ward</label>
-                        <select name="ward_id" id="ward_id"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4 text-base">
-                            <option value="">Select a ward</option>
-                            @foreach($wards as $ward)
-                                <option value="{{ $ward->id }}" {{ old('ward_id', $user->wards->contains($ward->id) ? $ward->id : '') == $ward->id ? 'selected' : '' }}>
-                                    {{ $ward->ward_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('ward_id')
+                        <label class="block text-sm font-medium text-gray-700">Assigned Wards</label>
+                        <div class="ward-selection-container border border-gray-300 rounded-md p-2 bg-white">
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-2">
+                                <div class="text-sm text-gray-500 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Select all wards this user can access</span>
+                                </div>
+                                <button type="button" id="select-all-wards" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-2 rounded transition-colors">
+                                    Select All
+                                </button>
+                            </div>
+                            
+                            <div class="ward-cards grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[240px] overflow-y-auto p-1">
+                                @foreach($wards as $ward)
+                                    @php
+                                        $selected = in_array($ward->id, old('ward_ids', $user->wards->pluck('id')->toArray()));
+                                    @endphp
+                                    <label for="ward_{{ $ward->id }}" class="ward-card border border-gray-200 rounded-md p-2 cursor-pointer hover:bg-gray-50 transition-colors flex items-start">
+                                        <input type="checkbox" name="ward_ids[]" id="ward_{{ $ward->id }}" value="{{ $ward->id }}" 
+                                            {{ $selected ? 'checked' : '' }}
+                                            class="h-5 w-5 text-primary border-gray-300 rounded mt-0.5 mr-2 focus:ring-primary">
+                                        <div>
+                                            <div class="font-medium text-gray-700 text-sm">{{ $ward->ward_name }}</div>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @error('ward_ids')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -163,6 +185,27 @@
                     eyeClosedConfirmation.classList.add('hidden');
                 }
             });
+        }
+        
+        // Ward selection functionality
+        const selectAllBtn = document.getElementById('select-all-wards');
+        const wardCheckboxes = document.querySelectorAll('input[name="ward_ids[]"]');
+        
+        if (selectAllBtn && wardCheckboxes.length > 0) {
+            selectAllBtn.addEventListener('click', function() {
+                const anyUnchecked = Array.from(wardCheckboxes).some(checkbox => !checkbox.checked);
+                
+                wardCheckboxes.forEach(checkbox => {
+                    checkbox.checked = anyUnchecked;
+                });
+                
+                // Update button text
+                selectAllBtn.textContent = anyUnchecked ? 'Deselect All' : 'Select All';
+            });
+            
+            // Initialize button text
+            const allChecked = Array.from(wardCheckboxes).every(checkbox => checkbox.checked);
+            selectAllBtn.textContent = allChecked ? 'Deselect All' : 'Select All';
         }
     });
 </script>

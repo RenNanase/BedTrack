@@ -133,7 +133,7 @@ class BassinetController extends Controller
                 'destination_bed_id' => $destinationCrib->id,
                 'destination_room_id' => $destinationCrib->room_id,
                 'patient_name' => $bassinet->patient_name,
-                'patient_category' => 'Paediatric',
+                'patient_category' => 'Newborn',
                 'gender' => $bassinet->gender,
                 'mrn' => $bassinet->mrn,
                 'transferred_at' => now(),
@@ -146,7 +146,7 @@ class BassinetController extends Controller
                 'patient_name' => $bassinet->patient_name,
                 'gender' => $bassinet->gender,
                 'mrn' => $bassinet->mrn,
-                'patient_category' => 'Paediatric',
+                'patient_category' => 'Newborn',
                 'status_changed_at' => now(),
             ]);
 
@@ -231,7 +231,9 @@ class BassinetController extends Controller
                     'baby_name' => $validated['baby_name'],
                     'baby_mrn' => $validated['baby_mrn'],
                     'mother_name' => $validated['mother_name'],
-                    'mother_mrn' => $validated['mother_mrn']
+                    'mother_mrn' => $validated['mother_mrn'],
+                    'ward_id' => $bassinet->room->ward_id,
+                    'room_id' => $bassinet->room_id
                 ])
                 ->log('registered baby in bassinet');
 
@@ -275,6 +277,9 @@ class BassinetController extends Controller
                     'message' => 'This bassinet is not occupied.'
                 ], 422);
             }
+            
+            // Get ward ID for activity logging
+            $wardId = $bassinet->room->ward_id;
 
             // Log the discharge activity
             activity()
@@ -284,7 +289,9 @@ class BassinetController extends Controller
                     'baby_name' => $bassinet->patient_name,
                     'baby_mrn' => $bassinet->mrn,
                     'mother_name' => $bassinet->mother_name,
-                    'mother_mrn' => $bassinet->mother_mrn
+                    'mother_mrn' => $bassinet->mother_mrn,
+                    'ward_id' => $wardId,
+                    'room_id' => $bassinet->room_id
                 ])
                 ->log('discharged baby from bassinet');
 
@@ -296,6 +303,7 @@ class BassinetController extends Controller
                 'mrn' => null,
                 'mother_name' => null,
                 'mother_mrn' => null,
+                'notes' => null,
                 'occupied_at' => null,
                 'status_changed_at' => now(),
             ]);
